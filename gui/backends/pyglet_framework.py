@@ -120,7 +120,6 @@ class PygletDraw(b2Draw):
     def __init__(self, test):
         super(PygletDraw, self).__init__()
         self.test = test
-        self.batch = pyglet.graphics.Batch()
 
     def StartDraw(self):
         pass
@@ -365,8 +364,10 @@ class PygletDraw(b2Draw):
 class PygletWindow(pyglet.window.Window):
 
     def __init__(self, test):
+        # adds 8-sample aliasing
         super(PygletWindow, self).__init__(config=pyglet.gl.Config(sample_buffers=1, samples=8))
         self.test = test
+        self._isFirstDraw = True
 
     def on_close(self):
         """
@@ -375,11 +376,20 @@ class PygletWindow(pyglet.window.Window):
         pyglet.clock.unschedule(self.test.SimulationLoop)
         super(PygletWindow, self).on_close()
 
+
     def on_show(self):
         """
         Callback: the window was shown.
         """
-        self.test.updateProjection()
+        pass
+        # removes projection update because it doesn't work
+        # self.test.updateProjection()
+
+    # adds projection update on first draw, doesn't work earlier somehow
+    def on_draw(self):
+        if self._isFirstDraw:
+            self.test.updateProjection()
+            self._isFirstDraw = False
 
     def on_key_press(self, key, modifiers):
         self.test._Keyboard_Event(key, down=True)
@@ -427,8 +437,8 @@ class PygletWindow(pyglet.window.Window):
 
         self.test.MouseMove(p)
 
-        if buttons & pyglet.window.mouse.RIGHT:
-            self.test.viewCenter -= (float(dx) / 5, float(dy) / 5)
+        # if buttons & pyglet.window.mouse.RIGHT:
+        #     self.test.viewCenter -= (float(dx) / 5, float(dy) / 5)
 
 
 class PygletFramework(FrameworkBase):
@@ -507,7 +517,7 @@ class PygletFramework(FrameworkBase):
         self.renderer = PygletDraw(self)
         self.renderer.surface = self.window.screen
         self.world.renderer = self.renderer
-        self._viewCenter = b2Vec2(0, 10.0)
+        self._viewCenter = b2Vec2(0, 0)
         self.groundbody = self.world.CreateBody()
 
     def setCenter(self, value):
@@ -563,7 +573,6 @@ class PygletFramework(FrameworkBase):
         # TODO: figure out why this is required
         self.window._enable_event_queue = False
         pyglet.app.run()
-
         self.world.contactListener = None
         self.world.destructionListener = None
         self.world.renderer = None

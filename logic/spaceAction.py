@@ -1,4 +1,4 @@
-from scanning import Scan
+from logic.scanning import Scan
 
 
 class SpaceAction:

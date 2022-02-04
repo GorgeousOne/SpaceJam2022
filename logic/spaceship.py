@@ -1,6 +1,6 @@
-from location import Location
-from spaceAction import SpaceAction
-from scanning import ScanResult
+from logic.location import Location
+from logic.spaceAction import SpaceAction
+from logic.scanning import ScanResult
 
 
 class Spaceship:

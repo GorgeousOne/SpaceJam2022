@@ -23,7 +23,7 @@ from math import sqrt
 from Box2D import (b2FixtureDef, b2PolygonShape,
                    b2Transform, b2_pi)
 
-from box.framework import (Framework, Keys, main)
+from Box2D.examples.framework import (Framework, Keys, main)
 
 
 class ApplyForce (Framework):
