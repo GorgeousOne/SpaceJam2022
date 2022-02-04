@@ -1,7 +1,7 @@
+from typing import List
+
 from logic.location import Location
 from logic.spaceAction import SpaceAction
-from logic.scanning import ScanResult
-
 
 class Spaceship:
 
@@ -15,5 +15,5 @@ class Spaceship:
 		"""
 		pass
 
-	def process_scan(self, scan_result: ScanResult):
+	def process_scan(self, located_rockets: List[Location]):
 		pass
