@@ -18,13 +18,12 @@ class BoxSpaceship:
 		])
 		self.body = world.CreateDynamicBody(
 			position=pos,
-			angle=b2_pi,
+			# angle=b2_pi,
 			linearDamping=0,
 			shapes=[self.shape],
 			shapeFixture=b2FixtureDef(density=2.0),
 			# fixedRotation=True # fixes angular velocity to one value
 		)
-
 	# self.body.linearVelocity += b2Vec2(20, 1)
 	# self.body.angularVelocity += np.pi
 

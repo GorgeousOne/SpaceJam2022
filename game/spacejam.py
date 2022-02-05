@@ -4,7 +4,6 @@ from game.boxBorder import BoxBorder
 from game.boxSpaceship import BoxSpaceship
 from gui.framework import (Framework, main)
 
-
 class SpaceJam(Framework):
 	name = "Space Jam"
 

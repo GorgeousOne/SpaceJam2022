@@ -535,10 +535,9 @@ try:
     framework_name = '%s_framework' % (fwSettings.backend.lower())
     __import__('backends', globals(), fromlist=[framework_name], level=1)
     framework_module = getattr(backends, framework_name)
-    Framework = getattr(framework_module,
-                        '%sFramework' % fwSettings.backend.capitalize())
+    Framework = getattr(framework_module, '%sFramework' % fwSettings.backend.capitalize())
 except Exception as ex:
     print('Unable to import the back-end %s: %s' % (fwSettings.backend, ex))
-    print('Attempting to fall back on the pygame back-end.')
+    print('Attempting to fall back on the pyglet back-end.')
 
     from Box2D.examples.backends.pyglet_framework import PygletFramework as Framework
