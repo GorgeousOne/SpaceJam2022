@@ -1,5 +1,7 @@
-from boxBorder import BoxBorder
-from boxSpaceship import BoxSpaceship
+from Box2D import b2Color
+
+from game.boxBorder import BoxBorder
+from game.boxSpaceship import BoxSpaceship
 from gui.framework import (Framework, main)
 
 
@@ -30,7 +32,7 @@ class SpaceJam(Framework):
 		self.setZoom((self.gameSize + 5) / 50)
 
 	def spawn_ship(self):
-		self.spaceships.append(BoxSpaceship(self.world))
+		self.spaceships.append(BoxSpaceship(self.world, color=b2Color(1, 0.73, 0)))
 
 
 if __name__ == "__main__":

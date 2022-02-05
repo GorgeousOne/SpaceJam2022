@@ -1,14 +1,8 @@
-import math
-from typing import Tuple, List
-
-from logic.location import Location
-
-
 class Scan:
 	def __init__(self, radius: float, angle: float):
 		if angle < 0:
 			raise ValueError("Scan cannot be lower 0")
-		elif angle > 2 * math.pi:
+		elif angle > 2 * np.pi:
 			raise ValueError("Scan cannot be greater 2*pi")
 		self._radius = radius
 		self._angle = angle

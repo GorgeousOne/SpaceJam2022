@@ -2,8 +2,8 @@ from typing import List
 
 import numpy as np
 
-from logic.location import Location
-from logic.scan import Scan
+from game.logic.location import Location
+from game.logic.scan import Scan
 
 
 def calculate_scan_energy_cost(scan: Scan) -> float:

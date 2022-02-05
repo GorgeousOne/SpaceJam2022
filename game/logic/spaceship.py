@@ -1,7 +1,7 @@
 from typing import List
 
-from logic.location import Location
-from logic.spaceAction import SpaceAction
+from game.logic.location import Location
+from game.logic.spaceAction import SpaceAction
 
 class Spaceship:
 
