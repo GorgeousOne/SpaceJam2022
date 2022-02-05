@@ -1,3 +1,2 @@
-PyBox2D manual
-https://github.com/pybox2d/pybox2d/wiki/manual
+
 
