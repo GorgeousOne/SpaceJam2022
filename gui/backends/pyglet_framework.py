@@ -140,6 +140,16 @@ class PygletDraw(b2Draw):
             out.extend(vertices[i + 1])
         return len(out) // 2, out
 
+    def triangle_strip(self, vertices):
+        """
+		in: vertices arranged for gl_triangle_fan ((x,y),(x,y)...)
+		out: vertices arranged for gl_triangles (x,y,x,y,x,y...)
+		"""
+        out = []
+        for v in vertices:
+            out.extend(v)
+        return len(out) // 2, out
+
     def line_loop(self, vertices):
         """
         in: vertices arranged for gl_line_loop ((x,y),(x,y)...)
@@ -301,13 +311,33 @@ class PygletDraw(b2Draw):
 
             self.batch.add(tf_count, gl.GL_TRIANGLES, self.blended,
                            ('v2f', tf_vertices),
-                           ('c4f', [0.5 * color.r, 0.5 * color.g, 0.5 * color.b, 0.5] * (tf_count)))
+                           # ('c4f', [0.5 * color.r, 0.5 * color.g, 0.5 * color.b, 0.5] * (tf_count)))
+                           ('c4f', [color.r, color.g, color.b, 1.0] * (tf_count)))
 
-            ll_count, ll_vertices = self.line_loop(vertices)
+            # ll_count, ll_vertices = self.line_loop(vertices)
+            #
+            # self.batch.add(ll_count, gl.GL_LINES, None,
+            #                ('v2f', ll_vertices),
+            #                ('c4f', [color.r, color.g, color.b, 1.0] * ll_count))
 
-            self.batch.add(ll_count, gl.GL_LINES, None,
-                           ('v2f', ll_vertices),
-                           ('c4f', [color.r, color.g, color.b, 1.0] * ll_count))
+    def DrawSolidTriangleStrip(self, vertices, color):
+        """
+        Draw a filled polygon given the world vertices (tuples) with the specified color.
+        """
+        if len(vertices) == 2:
+            p1, p2 = vertices
+            self.batch.add(2, gl.GL_LINES, None,
+                           ('v2f', (p1[0], p1[1], p2[0], p2[1])),
+                           ('c3f', [color.r, color.g, color.b] * 2))
+        else:
+            tf_count, tf_vertices = self.triangle_strip(vertices)
+            if tf_count == 0:
+                return
+
+            self.batch.add(tf_count, gl.GL_TRIANGLE_STRIP, self.blended,
+                           ('v2f', tf_vertices),
+                           # ('c4f', [0.5 * color.r, 0.5 * color.g, 0.5 * color.b, 0.5] * (tf_count)))
+                           ('c4f', [color.r, color.g, color.b, 1.0] * (tf_count)))
 
     def DrawSegment(self, p1, p2, color):
         """
@@ -381,8 +411,8 @@ class PygletWindow(pyglet.window.Window):
         """
         Callback: the window was shown.
         """
-        pass
-        # removes projection update because it doesn't work
+        # updates projection on next draw
+        self._isFirstDraw = True
         # self.test.updateProjection()
 
     # adds projection update on first draw, doesn't work earlier somehow
@@ -565,9 +595,7 @@ class PygletFramework(FrameworkBase):
         """
         Main loop.
         """
-        if self.settings.hz > 0.0:
-            pyglet.clock.schedule_interval(
-                self.SimulationLoop, 1.0 / self.settings.hz)
+        if self.settings.hz > 0.0: pyglet.clock.schedule_interval(self.SimulationLoop, 1.0 / self.settings.hz)
 
         # self.window.push_handlers(pyglet.window.event.WindowEventLogger())
         # TODO: figure out why this is required
@@ -583,7 +611,6 @@ class PygletFramework(FrameworkBase):
         And be sure to call super(classname, self).Step(settings) at the end
         of your Step function.
         """
-
         # Check the input and clear the screen
         self.CheckKeys()
         self.window.clear()

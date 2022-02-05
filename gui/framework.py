@@ -186,8 +186,7 @@ class FrameworkBase(b2ContactListener):
 
         # Tell Box2D to step
         t_step = time()
-        self.world.Step(timeStep, settings.velocityIterations,
-                        settings.positionIterations)
+        self.world.Step(timeStep, settings.velocityIterations, settings.positionIterations)
         self.world.ClearForces()
         t_step = time() - t_step
 
@@ -198,12 +197,12 @@ class FrameworkBase(b2ContactListener):
         if renderer is not None:
             renderer.StartDraw()
 
-        self.world.DrawDebugData()
+        self.Redraw()
 
         # If the bomb is frozen, get rid of it.
-        if self.bomb and not self.bomb.awake:
-            self.world.DestroyBody(self.bomb)
-            self.bomb = None
+        # if self.bomb and not self.bomb.awake:
+        #     self.world.DestroyBody(self.bomb)
+        #     self.bomb = None
 
         # Take care of additional drawing (fps, mouse joint, slingshot bomb,
         # contact points)
@@ -222,12 +221,12 @@ class FrameworkBase(b2ContactListener):
                 renderer.DrawSegment(p1, p2, self.colors['joint_line'])
 
             # Draw the slingshot bomb
-            if self.bombSpawning:
-                renderer.DrawPoint(renderer.to_screen(self.bombSpawnPoint),
-                                   settings.pointSize, self.colors['bomb_center'])
-                renderer.DrawSegment(renderer.to_screen(self.bombSpawnPoint),
-                                     renderer.to_screen(self.mouseWorld),
-                                     self.colors['bomb_line'])
+            # if self.bombSpawning:
+            #     renderer.DrawPoint(renderer.to_screen(self.bombSpawnPoint),
+            #                        settings.pointSize, self.colors['bomb_center'])
+            #     renderer.DrawSegment(renderer.to_screen(self.bombSpawnPoint),
+            #                          renderer.to_screen(self.mouseWorld),
+            #                          self.colors['bomb_line'])
 
             # Draw each of the contact points in different colors.
             if self.settings.drawContactPoints:
@@ -286,6 +285,13 @@ class FrameworkBase(b2ContactListener):
                                "" % (sum(self.t_draws) / len(self.t_draws),
                                      sum(self.t_steps) / len(self.t_steps))
                                )
+
+    # added by Aaron
+    def Redraw(self):
+        """
+        Function for drawing logic. Displays default debug data if not overwritten.
+        """
+        self.world.DrawDebugData()
 
     def ShiftMouseDown(self, p):
         """
