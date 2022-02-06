@@ -20,7 +20,7 @@ class SpaceJam(Framework):
 		self._create_battlefield()
 
 		self.spaceships = []
-		# self.spawn_ship()
+		self.spawn_ship()
 		self.spaceshipHandler = SpaceshipHandler()
 
 	def Redraw(self):
