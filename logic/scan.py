@@ -1,5 +1,5 @@
 import numpy as np
-from game.logic.location import wrap_to_pi
+from logic import wrap_to_pi
 
 class Scan:
 	def __init__(self, radius: float, direction: float, angle: float):

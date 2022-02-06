@@ -1,4 +1,4 @@
-from game.logic.scan import Scan
+from logic import Scan
 
 
 class SpaceAction:

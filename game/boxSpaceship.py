@@ -1,9 +1,9 @@
 from typing import Tuple
 
 import numpy as np
-from Box2D import (b2World, b2_pi, b2PolygonShape, b2FixtureDef, b2Draw, b2Color)
+from Box2D import (b2World, b2PolygonShape, b2FixtureDef, b2Draw, b2Color)
 
-from game.logic.location import Location
+from logic.location import Location
 
 
 class BoxSpaceship:

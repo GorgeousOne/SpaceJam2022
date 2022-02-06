@@ -2,13 +2,16 @@ from Box2D import b2Color
 
 from game.boxBorder import BoxBorder
 from game.boxSpaceship import BoxSpaceship
+from game.spaceshipHandler import SpaceshipHandler
 from gui.framework import (Framework, main)
+
 
 class SpaceJam(Framework):
 	name = "Space Jam"
 
 	def __init__(self):
 		super(SpaceJam, self).__init__()
+
 		self.windowSize = 800
 		self.window.set_size(self.windowSize, self.windowSize)
 		self.window.set_caption("Space Jam")
@@ -17,7 +20,8 @@ class SpaceJam(Framework):
 		self._create_battlefield()
 
 		self.spaceships = []
-		self.spawn_ship()
+		# self.spawn_ship()
+		self.spaceshipHandler = SpaceshipHandler()
 
 	def Redraw(self):
 		# super(SpaceJam, self).Redraw()

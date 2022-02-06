@@ -2,9 +2,9 @@ import unittest
 
 import numpy as np
 
-from game.logic.location import Location
-from game.logic.private import scanning
-from game.logic.scan import Scan
+from logic import Location
+from logic.private import scanning
+from logic import Scan
 
 
 class ScanningTest(unittest.TestCase):

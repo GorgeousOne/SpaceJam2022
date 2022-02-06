@@ -2,8 +2,8 @@ from typing import List
 
 import numpy as np
 
-from game.logic.location import Location
-from game.logic.scan import Scan
+from logic.location import Location
+from logic.scan import Scan
 
 EPSILON = 0.0001
 

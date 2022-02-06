@@ -1,1 +1,1 @@
-pyinstaller.exe --onefile ../game/spacejam.py --hidden-import gui.backends.pyglet_framework
+pyinstaller.exe --onefile ../spacejam.py --hidden-import gui.backends.pyglet_framework
