@@ -21,7 +21,10 @@ class BoxSpaceship:
 			# angle=b2_pi,
 			linearDamping=0,
 			shapes=[self.shape],
-			shapeFixture=b2FixtureDef(density=2.0),
+			shapeFixture=b2FixtureDef(
+				restitution = 0.2, # bounciness between 0 and 1
+				density=2.0 # wanna find out what this does
+			),
 			# fixedRotation=True # fixes angular velocity to one value
 		)
 	# self.body.linearVelocity += b2Vec2(20, 1)

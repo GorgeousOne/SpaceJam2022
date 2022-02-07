@@ -2,7 +2,7 @@ from Box2D import b2Color
 
 from game.boxBorder import BoxBorder
 from game.boxSpaceship import BoxSpaceship
-from game.spaceshipHandler import SpaceshipHandler
+from game.controllerHandler import ControllerHandler
 from gui.framework import (Framework, main)
 
 
@@ -21,7 +21,7 @@ class SpaceJam(Framework):
 
 		self.spaceships = []
 		self.spawn_ship()
-		self.spaceshipHandler = SpaceshipHandler()
+		self.spaceshipHandler = ControllerHandler()
 
 	def Redraw(self):
 		# super(SpaceJam, self).Redraw()
@@ -32,7 +32,7 @@ class SpaceJam(Framework):
 	def _create_battlefield(self):
 		self.world.gravity = (0.0, 0.0)
 		self.border = BoxBorder(self.world, self.gameSize, 1)
-		self.setZoom((self.gameSize + 5) / 50)
+		self.setZoom((self.gameSize + 4) / 50)
 
 	def spawn_ship(self):
 		self.spaceships.append(BoxSpaceship(self.world, color=b2Color(1, 0.73, 0)))
