@@ -16,6 +16,9 @@ class Location:
 	def get_rotation(self) -> float:
 		return self._rotation
 
+	def get_direction(self) -> np.ndarray:
+		return np.array([np.cos(self._rotation), np.sin(self._rotation)])
+
 	def get_velocity(self) -> np.ndarray:
 		return self._velocity
 

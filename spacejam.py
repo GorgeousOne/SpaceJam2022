@@ -1,9 +1,11 @@
+import pyglet
 from Box2D import b2Color
 
 from game.boxBorder import BoxBorder
+from game.boxRocket import BoxRocket
 from game.boxSpaceship import BoxSpaceship
 from game.controllerHandler import ControllerHandler
-from gui.framework import (Framework, main)
+from gui.framework import (Framework, main, Keys)
 
 
 class SpaceJam(Framework):
@@ -20,12 +22,16 @@ class SpaceJam(Framework):
 		self._create_battlefield()
 
 		self.spaceships = []
+		self.bullets = []
+
 		self.spawn_ship()
 		self.spaceshipHandler = ControllerHandler()
 
 	def Redraw(self):
-		# super(SpaceJam, self).Redraw()
 		self.border.display(self.renderer)
+		for bullet in self.bullets:
+			bullet.display(self.renderer)
+
 		for ship in self.spaceships:
 			ship.display(self.renderer)
 
@@ -36,6 +42,11 @@ class SpaceJam(Framework):
 
 	def spawn_ship(self):
 		self.spaceships.append(BoxSpaceship(self.world, color=b2Color(1, 0.73, 0)))
+
+	def Keyboard(self, key):
+		if key == 32:
+			for ship in self.spaceships:
+				self.bullets.append(BoxRocket(self.world, ship))
 
 
 if __name__ == "__main__":

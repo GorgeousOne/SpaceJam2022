@@ -298,10 +298,10 @@ class FrameworkBase(b2ContactListener):
         Indicates that there was a left click at point p (world coordinates)
         with the left shift key being held down.
         """
-        self.mouseWorld = p
-
-        if not self.mouseJoint:
-            self.SpawnBomb(p)
+        # self.mouseWorld = p
+        #
+        # if not self.mouseJoint:
+        #     self.SpawnBomb(p)
 
     def MouseDown(self, p):
         """

@@ -268,16 +268,17 @@ class PygletDraw(b2Draw):
 
         self.batch.add(tf_count, gl.GL_TRIANGLES, self.blended,
                        ('v2f', tf_vertices),
-                       ('c4f', [0.5 * color.r, 0.5 * color.g, 0.5 * color.b, 0.5] * tf_count))
+                       ('c4f', [color.r, color.g, color.b, 1.0] * tf_count))
+                       # ('c4f', [0.5 * color.r, 0.5 * color.g, 0.5 * color.b, 0.5] * tf_count))
 
-        self.batch.add(ll_count, gl.GL_LINES, None,
-                       ('v2f', ll_vertices),
-                       ('c4f', [color.r, color.g, color.b, 1.0] * (ll_count)))
+        # self.batch.add(ll_count, gl.GL_LINES, None,
+        #                ('v2f', ll_vertices),
+        #                ('c4f', [color.r, color.g, color.b, 1.0] * (ll_count)))
 
-        p = b2Vec2(center) + radius * b2Vec2(axis)
-        self.batch.add(2, gl.GL_LINES, None,
-                       ('v2f', (center[0], center[1], p[0], p[1])),
-                       ('c3f', [1.0, 0.0, 0.0] * 2))
+        # p = b2Vec2(center) + radius * b2Vec2(axis)
+        # self.batch.add(2, gl.GL_LINES, None,
+        #                ('v2f', (center[0], center[1], p[0], p[1])),
+        #                ('c3f', [1.0, 0.0, 0.0] * 2))
 
     def DrawPolygon(self, vertices, color):
         """
@@ -338,6 +339,23 @@ class PygletDraw(b2Draw):
                            ('v2f', tf_vertices),
                            # ('c4f', [0.5 * color.r, 0.5 * color.g, 0.5 * color.b, 0.5] * (tf_count)))
                            ('c4f', [color.r, color.g, color.b, 1.0] * (tf_count)))
+
+    def DrawGradientRect(self, vertices, color1, color2):
+        """
+		Draw a rectangle fading from one color to another, pls set color.a t
+		"""
+        tf_count, tf_vertices = self.triangle_strip(vertices)
+        self.batch.add_indexed(4, gl.GL_TRIANGLES, self.blended,
+            [0, 1, 3, 0, 3, 2],
+            ('v2f', tf_vertices),
+            ('c4f', [
+                color1.r, color1.g, color1.b, getattr(color1, "a", 1.0),
+                color1.r, color1.g, color1.b, getattr(color1, "a", 1.0),
+                color2.r, color2.g, color2.b, getattr(color2, "a", 1.0),
+                color2.r, color2.g, color2.b, getattr(color2, "a", 1.0),
+            ])
+        )
+
 
     def DrawSegment(self, p1, p2, color):
         """
