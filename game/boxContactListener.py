@@ -1,5 +1,6 @@
-from Box2D import b2ContactListener, b2World
+from Box2D import b2ContactListener, b2World, b2Color
 
+from game.boxExplosion import BoxExplosion
 from game.boxRocket import BoxRocket
 from game.boxSpaceship import BoxSpaceship
 
@@ -9,11 +10,16 @@ class BoxContactListener(b2ContactListener):
 	def __init__(self, world: b2World):
 		b2ContactListener.__init__(self)
 		self._world = world
-		self._rockets = set()
+		self.spaceships = set()
+		self.rockets = set()
+		self.explosions = set()
 		self._bodies_to_remove = set()
 
 	def add_rocket(self, rocket: BoxRocket):
-		self._rockets.add(rocket)
+		self.rockets.add(rocket)
+
+	def add_spaceship(self, spaceship: BoxSpaceship):
+		self.spaceships.add(spaceship)
 
 	def BeginContact(self, contact):
 		body_a = contact.fixtureA.body
@@ -31,13 +37,24 @@ class BoxContactListener(b2ContactListener):
 		if isinstance(other, BoxSpaceship):
 			# prevents rockets from damaging own spaceship
 			if rocket.shooter != other:
-				other.damage(20)
+				self._handle_spaceship_damage(other)
 			else:
 				return
 		self._bodies_to_remove.add(rocket.body)
-		self._rockets.discard(rocket)
+		self.rockets.discard(rocket)
+		self.explosions.add(BoxExplosion(rocket.body.position, 3, 1, rocket.color))
+
+	def _handle_spaceship_damage(self, spaceship):
+		spaceship.damage(20)
+		if spaceship.health <= 0:
+			self._bodies_to_remove.add(spaceship.body)
+			self.spaceships.discard(spaceship)
+			self.explosions.add(BoxExplosion(spaceship.body.position, 5, 2, b2Color(1, 0, 0)))
 
 	def remove_bodies(self):
+		for explosion in list(self.explosions):
+			if explosion.is_over():
+				self.explosions.discard(explosion)
 		for body in self._bodies_to_remove:
 			self._world.DestroyBody(body)
 		self._bodies_to_remove.clear()

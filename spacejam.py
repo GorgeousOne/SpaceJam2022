@@ -19,26 +19,25 @@ class SpaceJam(Framework):
 		self.windowSize = 800
 		self.window.set_size(self.windowSize, self.windowSize)
 		self.window.set_caption("Space Jam")
+		self.spaceshipHandler = ControllerHandler()
+		self.contactHandler = BoxContactListener(self.world)
+		self.world.contactListener = self.contactHandler
 
 		self.gameSize = 100
 		self._create_battlefield()
 
-		self.spaceships = []
-
 		self.spawn_ship((-25, 0))
 		self.spawn_ship((25, 0), b2Color(0.26, 0.53, 0.96))
-		self.spaceshipHandler = ControllerHandler()
-
-		self.contactHandler = BoxContactListener(self.world)
-		self.world.contactListener = self.contactHandler
 
 	def Redraw(self):
 		self.contactHandler.remove_bodies()
 		self.border.display(self.renderer)
 
-		for rocket in self.contactHandler._rockets:
+		for explosion in self.contactHandler.explosions:
+			explosion.display(self.renderer)
+		for rocket in self.contactHandler.rockets:
 			rocket.display(self.renderer)
-		for ship in self.spaceships:
+		for ship in self.contactHandler.spaceships:
 			ship.display(self.renderer)
 
 	def _create_battlefield(self):
@@ -47,11 +46,11 @@ class SpaceJam(Framework):
 		self.setZoom((self.gameSize + 4) / 50)
 
 	def spawn_ship(self, pos: Tuple[float, float] = (0, 0), fill: b2Color = b2Color(1, 0.73, 0)):
-		self.spaceships.append(BoxSpaceship(self.world, 60, pos, fill))
+		self.contactHandler.add_spaceship(BoxSpaceship(self.world, 60, pos, fill))
 
 	def Keyboard(self, key):
 		if key == 32:
-			for ship in self.spaceships:
+			for ship in self.contactHandler.spaceships:
 				rocket = BoxRocket(self.world, ship)
 				self.contactHandler.add_rocket(rocket)
 

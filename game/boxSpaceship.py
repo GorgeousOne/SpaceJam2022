@@ -9,7 +9,7 @@ from logic.location import Location
 class BoxSpaceship:
 
 	def __init__(self, world: b2World, health: int, pos: Tuple[float, float] = (0, 0), color: b2Color = b2Color(1., 1., 1.)):
-		self.fill = b2Color(color)
+		self.color = b2Color(color)
 		self.shape = b2PolygonShape(vertices=[
 			(2.618, 0),
 			(0, -1),
@@ -35,7 +35,7 @@ class BoxSpaceship:
 	def damage(self, amount: int):
 		self.health -= amount
 		if self.health <= 0:
-			self.fill = b2Color(255, 0, 0)
+			self.color = b2Color(255, 0, 0)
 
 	def get_location(self):
 		pos = self.body.position
@@ -47,4 +47,4 @@ class BoxSpaceship:
 
 		for v in self.shape.vertices:
 			vertices.append(self.body.GetWorldPoint(v))
-		renderer.DrawSolidPolygon(vertices, self.fill)
+		renderer.DrawSolidPolygon(vertices, self.color)

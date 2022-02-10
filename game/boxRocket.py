@@ -1,6 +1,4 @@
-import numpy as np
-import copy
-from Box2D import b2World, b2FixtureDef, b2CircleShape, b2Vec2, b2Color
+from Box2D import b2World, b2FixtureDef, b2CircleShape, b2Vec2, b2Color, b2Draw, b2Body
 
 from game.boxSpaceship import BoxSpaceship
 
@@ -14,7 +12,7 @@ class BoxRocket:
 		self.shooter = shooter
 		self.world = world
 		self.radius = radius
-		self.color = b2Color(shooter.fill)
+		self.color = b2Color(shooter.color)
 
 		self.shadowVerts = []
 		self.shadowColor = b2Color(self.color)
@@ -44,7 +42,7 @@ class BoxRocket:
 			b2Vec2(-length, -self.radius)
 		]
 
-	def display(self, renderer):
+	def display(self, renderer: b2Draw):
 		transparent = b2Color()
 		transparent.a = 0
 		renderer.DrawGradientRect(self._get_shadow_verts_translated(), self.shadowColor, transparent)
