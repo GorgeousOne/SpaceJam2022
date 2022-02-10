@@ -10,12 +10,11 @@ class BoxRocket:
 	def __init__(self,
 	             world: b2World,
 	             shooter: BoxSpaceship,
-	             radius: float = .75,
-	             color: b2Color = b2Color(1.0, 1.0, 1.0)):
+	             radius: float = .75):
 		self.shooter = shooter
 		self.world = world
 		self.radius = radius
-		self.color = color
+		self.color = b2Color(shooter.fill)
 
 		self.shadowVerts = []
 		self.shadowColor = b2Color(self.color)
@@ -25,6 +24,7 @@ class BoxRocket:
 
 		self.shape = b2CircleShape
 		self.body = self.world.CreateDynamicBody(
+			userData=self,  # adds a reference on the body to the rocket object
 			allowSleep=True,
 			position=shooter.get_location().get_position(),
 			angle=shooter.get_location().get_rotation(),

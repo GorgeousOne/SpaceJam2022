@@ -26,7 +26,7 @@ class ControllerHandler:
 		args = sys.argv
 
 		if len(args) < 2:
-			print("meh")
+			print("no user scripts loaded from cmd line arguments")
 
 		for i in range(1, len(args)):
 			module = load_module(args[i])
