@@ -6,8 +6,9 @@ from game.boxBorder import BoxBorder
 from game.boxContactListener import BoxContactListener
 from game.boxRocket import BoxRocket
 from game.boxSpaceship import BoxSpaceship
-from game.controllerHandler import ControllerHandler
+from game.pilotHandler import PilotHandler
 from gui.framework import (Framework, main)
+from logic.pilot.afkPilot import AfkPilot
 
 
 class SpaceJam(Framework):
@@ -19,7 +20,7 @@ class SpaceJam(Framework):
 		self.windowSize = 800
 		self.window.set_size(self.windowSize, self.windowSize)
 		self.window.set_caption("Space Jam")
-		self.spaceshipHandler = ControllerHandler()
+		self.pilotHandler = PilotHandler()
 		self.contactHandler = BoxContactListener(self.world)
 		self.world.contactListener = self.contactHandler
 
@@ -46,7 +47,7 @@ class SpaceJam(Framework):
 		self.setZoom((self.gameSize + 4) / 50)
 
 	def spawn_ship(self, pos: Tuple[float, float] = (0, 0), fill: b2Color = b2Color(1, 0.73, 0)):
-		self.contactHandler.add_spaceship(BoxSpaceship(self.world, 60, pos, fill))
+		self.contactHandler.add_spaceship(BoxSpaceship(self.world, AfkPilot(), 60, pos, fill))
 
 	def Keyboard(self, key):
 		if key == 32:

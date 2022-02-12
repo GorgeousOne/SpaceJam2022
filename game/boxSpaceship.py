@@ -1,14 +1,20 @@
-from typing import Tuple
+from typing import Tuple, List
 
 import numpy as np
 from Box2D import (b2World, b2PolygonShape, b2FixtureDef, b2Draw, b2Color, b2Body)
 
 from logic.location import Location
+from logic.pilotAction import PilotAction
+from logic.spaceshipPilot import SpaceshipPilot
 
 
 class BoxSpaceship:
 
-	def __init__(self, world: b2World, health: int, pos: Tuple[float, float] = (0, 0), color: b2Color = b2Color(1., 1., 1.)):
+	def __init__(self, world: b2World, pilot: SpaceshipPilot, health: int, pos: Tuple[float, float] = (0, 0), color: b2Color = b2Color(1., 1., 1.)):
+		self.pilot = pilot
+		self.health = health
+		self.energy = 0
+
 		self.color = b2Color(color)
 		self.shape = b2PolygonShape(vertices=[
 			(2.618, 0),
@@ -29,8 +35,13 @@ class BoxSpaceship:
 		)
 		# self.body.linearVelocity += b2Vec2(20, 1)
 		# self.body.angularVelocity += np.pi
-		self.health = health
 
+	def update(self, new_energy) -> PilotAction:
+		self.energy = new_energy
+		return self.pilot.update(self.get_location(), self.health, self.energy)
+
+	def process_scan(self, located_rockets: List[Location]) -> PilotAction:
+		return self.pilot.process_scan(located_rockets)
 
 	def damage(self, amount: int):
 		self.health -= amount

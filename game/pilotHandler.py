@@ -16,13 +16,13 @@ def load_module(rel_path: str):
 	return module
 
 
-class ControllerHandler:
+class PilotHandler:
 
 	def __init__(self):
-		self.controllers = {}
-		self.load_user_controllers()
+		self.pilots = {}
+		self.load_user_pilots()
 
-	def load_user_controllers(self):
+	def load_user_pilots(self):
 		args = sys.argv
 
 		if len(args) < 2:
@@ -32,11 +32,11 @@ class ControllerHandler:
 			module = load_module(args[i])
 
 			try:
-				controller = module.SpaceshipController()
+				pilot = module.SpaceshipPilot()
 			except AttributeError:
-				raise ValueError("Could not locate class SpaceshipController in script " + args[i])
-			self.register_controller(module.__name__, controller)
+				raise ValueError("Could not locate class SpaceshipPilot in script " + args[i])
+			self.register_pilot(module.__name__, pilot)
 
-	def register_controller(self, name, controller):
-		self.controllers[name] = controller
-		print("register controller", name)
+	def register_pilot(self, name, pilot):
+		self.pilots[name] = pilot
+		print("register pilot", name)

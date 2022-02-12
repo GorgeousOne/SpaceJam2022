@@ -538,7 +538,7 @@ class PygletFramework(FrameworkBase):
         self.fps = 0
 
         # Window-related
-        self.fontname = "Arial"
+        self.fontname = "Calibri"
         self.fontsize = 10
         self.font = None
         self.textGroup = None
