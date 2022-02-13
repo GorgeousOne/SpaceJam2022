@@ -36,6 +36,7 @@ class CirclePilot(SpaceshipPilot):
 
 		if self.updateCount % 5 == 0:
 			action.shoot_rocket(angle)
+			action.scan_area(50, vec_angle(self.center - pos), np.pi / 8)
 		return action
 
 	def process_scan(self, current_action: PilotAction, located_rockets: List[Location]) -> PilotAction:
@@ -46,7 +47,9 @@ def vec_angle(vec: np.ndarray):
 	return np.arctan2(vec[1], vec[0])
 
 def norm_vec(vec: np.ndarray):
-	""" Returns the normal vector of the vector.  """
+	"""
+	Returns the normal vector of the vector.
+	"""
 	return vec / np.linalg.norm(vec)
 
 

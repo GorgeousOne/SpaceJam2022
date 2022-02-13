@@ -1,11 +1,11 @@
 import math
 from typing import List
 
-from Box2D import b2Vec2, b2World
+from Box2D import b2Vec2, b2World, b2Color
 
-from game import timeLimit
 from game.boxContactListener import BoxContactListener
 from game.boxRocket import BoxRocket
+from game.boxScan import BoxScan
 from game.boxSpaceship import BoxSpaceship
 from logic import scanning
 from logic.location import Location
@@ -17,19 +17,18 @@ class GameHandler:
 	def __init__(self, world: b2World, contact_listener: BoxContactListener):
 		self.world = world
 		self.contact_listener = contact_listener
-		self.spaceships = set()
 		self.rocket_speed = 10
 		self.tick_energy = 100
-		pass
+		self.colorScanSuccess = b2Color(1, .3, .3)
 
 	def update(self):
 		for spaceship in self.contact_listener.spaceships:
-			try:
-				action = spaceship.update(self.tick_energy)
-				self.handle_pilot_action(spaceship, action)
-			except Exception as e:
-				print(str(e))
-				continue
+			# try:
+			action = spaceship.update(self.tick_energy)
+			self.handle_pilot_action(spaceship, action)
+			# except Exception as e:
+			# 	print(str(e.__traceback__))
+			# 	continue
 
 	def handle_pilot_action(self, spaceship: BoxSpaceship, action: PilotAction):
 		if not action:
@@ -50,20 +49,39 @@ class GameHandler:
 			raise ValueError("Not enough energy to perform scan.")
 
 		located_rockets = scanning.calculate_located_rockets(
+			spaceship.get_location(),
+			scan.get("radius"),
 			scan.get("direction"),
 			scan.get("angle"),
-			scan.get("radius"),
-			spaceship.get_location(),
-			[other.get_location() for other in self.spaceships if other != spaceship])
+			[other.get_location() for other in self.contact_listener.spaceships if other != spaceship])
+
+		# print(self.spaceships, [other.get_location() for other in self.spaceships if other != spaceship], located_rockets)
+		if located_rockets:
+			self.contact_listener.add_scan(BoxScan(
+				spaceship.get_location().get_position(),
+				scan.get("radius"),
+				scan.get("direction"),
+				scan.get("angle"),
+				self.colorScanSuccess))
+		else:
+			self.contact_listener.add_scan(BoxScan(
+				spaceship.get_location().get_position(),
+				scan.get("radius"),
+				scan.get("direction"),
+				scan.get("angle")))
+
 		self.process_scan(spaceship, action, located_rockets)
 
 	def process_scan(self, spaceship: BoxSpaceship, action: PilotAction, located_rockets: List[Location]):
-		try:
-			action = spaceship.process_scan(action, located_rockets)
-			self.handle_pilot_action(spaceship, action)
-		except Exception as e:
-			print(str(e))
+		# try:
+		action = spaceship.process_scan(action, located_rockets)
+		if not action:
 			return
+
+		self.handle_pilot_action(spaceship, action)
+		# except Exception as e:
+		# 	print(str(e))
+		# 	return
 		# make sure no second scan is possible after first scan
 		action.scan_action = None
 		self.handle_pilot_action(spaceship, action)

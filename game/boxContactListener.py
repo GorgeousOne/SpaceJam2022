@@ -2,6 +2,7 @@ from Box2D import b2ContactListener, b2World, b2Color
 
 from game.boxExplosion import BoxExplosion
 from game.boxRocket import BoxRocket
+from game.boxScan import BoxScan
 from game.boxSpaceship import BoxSpaceship
 
 
@@ -13,6 +14,7 @@ class BoxContactListener(b2ContactListener):
 		self.spaceships = set()
 		self.rockets = set()
 		self.explosions = set()
+		self.scans = set()
 		self._bodies_to_remove = set()
 
 	def add_rocket(self, rocket: BoxRocket):
@@ -20,6 +22,9 @@ class BoxContactListener(b2ContactListener):
 
 	def add_spaceship(self, spaceship: BoxSpaceship):
 		self.spaceships.add(spaceship)
+
+	def add_scan(self, scan: BoxScan):
+		self.scans.add(scan)
 
 	def BeginContact(self, contact):
 		body_a = contact.fixtureA.body
@@ -52,9 +57,14 @@ class BoxContactListener(b2ContactListener):
 			self.explosions.add(BoxExplosion(spaceship.body.position, 5, 2, b2Color(1, 0, 0)))
 
 	def remove_bodies(self):
+		for scan in list(self.scans):
+			if scan.is_over():
+				self.scans.discard(scan)
+
 		for explosion in list(self.explosions):
 			if explosion.is_over():
 				self.explosions.discard(explosion)
+
 		for body in self._bodies_to_remove:
 			self._world.DestroyBody(body)
 		self._bodies_to_remove.clear()

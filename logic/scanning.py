@@ -13,11 +13,11 @@ def calculate_scan_energy_cost(direction: float, radius: float) -> float:
 	return radius * direction
 
 
-def calculate_located_rockets(direction: float, angle: float, radius: float, scan_center: Location, targets: List[Location]) -> List[Location]:
-	return list(filter(lambda loc: is_loc_in_scan(loc, direction, angle, radius, scan_center), targets))
+def calculate_located_rockets(scan_center: Location, radius: float, direction: float, angle: float, targets: List[Location]) -> List[Location]:
+	return list(filter(lambda loc: is_loc_in_scan(loc, scan_center, radius, direction, angle), targets))
 
 
-def is_loc_in_scan(loc: Location, direction: float, angle: float, radius: float, scan_center: Location) -> bool:
+def is_loc_in_scan(loc: Location, scan_center: Location, radius: float, direction: float, angle: float) -> bool:
 	dist_vec = loc.get_position() - scan_center.get_position()
 
 	if np.linalg.norm(dist_vec) > radius:

@@ -127,6 +127,13 @@ class PygletDraw(b2Draw):
     def EndDraw(self):
         pass
 
+    # Aaron
+    def vertex_array(self, vertices):
+        out = []
+        for v in vertices:
+            out.extend(v)
+        return len(vertices), out
+
     def triangle_fan(self, vertices):
         """
         in: vertices arranged for gl_triangle_fan ((x,y),(x,y)...)
@@ -134,7 +141,7 @@ class PygletDraw(b2Draw):
         """
         out = []
         for i in range(1, len(vertices) - 1):
-            # 0,1,2   0,2,3  0,3,4 ..
+            # 0,1,2  0,2,3  0,3,4 ...
             out.extend(vertices[0])
             out.extend(vertices[i])
             out.extend(vertices[i + 1])
@@ -146,8 +153,11 @@ class PygletDraw(b2Draw):
 		out: vertices arranged for gl_triangles (x,y,x,y,x,y...)
 		"""
         out = []
-        for v in vertices:
-            out.extend(v)
+        for i in range(len(vertices) - 2):
+            # 0,1,2  1,2,3  2,3,4 ...
+            out.extend(vertices[i])
+            out.extend(vertices[i+1])
+            out.extend(vertices[i+2])
         return len(out) // 2, out
 
     def line_loop(self, vertices):
@@ -246,6 +256,18 @@ class PygletDraw(b2Draw):
             ret_ll.extend((x + center[0], y + center[1]))
         return ret_tf, ret_ll
 
+    #Aaron
+    def getArcVertices(self, center, radius, angle_start, angle_end):
+        angle = angle_end - angle_start
+        fan = []
+        fan.append((center[0], center[1]))
+        for i in range(self.circle_segments):
+            current_angle = angle_start + i / (self.circle_segments + 1) * angle
+            fan.append((
+                center[0] + math.cos(current_angle) * radius,
+                center[1] + math.sin(current_angle) * radius))
+        return self.triangle_fan(fan)
+
     def DrawCircle(self, center, radius, color):
         """
         Draw an unfilled circle given center, radius and color.
@@ -322,23 +344,20 @@ class PygletDraw(b2Draw):
             #                ('c4f', [color.r, color.g, color.b, 1.0] * ll_count))
 
     def DrawSolidTriangleStrip(self, vertices, color):
-        """
-        Draw a filled polygon given the world vertices (tuples) with the specified color.
-        """
-        if len(vertices) == 2:
-            p1, p2 = vertices
-            self.batch.add(2, gl.GL_LINES, None,
-                           ('v2f', (p1[0], p1[1], p2[0], p2[1])),
-                           ('c3f', [color.r, color.g, color.b] * 2))
-        else:
-            tf_count, tf_vertices = self.triangle_strip(vertices)
-            if tf_count == 0:
-                return
+        # if len(vertices) == 2:
+        #     p1, p2 = vertices
+        #     self.batch.add(2, gl.GL_LINES, None,
+        #                    ('v2f', (p1[0], p1[1], p2[0], p2[1])),
+        #                    ('c3f', [color.r, color.g, color.b] * 2))
+        # else:
+        ts_count, ts_vertices = self.triangle_strip(vertices)
+            # if tf_count == 0:
+            #     return
 
-            self.batch.add(tf_count, gl.GL_TRIANGLE_STRIP, self.blended,
-                           ('v2f', tf_vertices),
-                           # ('c4f', [0.5 * color.r, 0.5 * color.g, 0.5 * color.b, 0.5] * (tf_count)))
-                           ('c4f', [color.r, color.g, color.b, 1.0] * (tf_count)))
+        self.batch.add(ts_count, gl.GL_TRIANGLES, self.blended,
+                       ('v2f', ts_vertices),
+                       # ('c4f', [0.5 * color.r, 0.5 * color.g, 0.5 * color.b, 0.5] * (tf_count)))
+                       ('c4f', [color.r, color.g, color.b, 1.0] * (ts_count)))
 
     def c4f_arr(self, color: b2Color):
         return [color.r, color.g, color.b, getattr(color, "a", 1.0)]
@@ -347,10 +366,10 @@ class PygletDraw(b2Draw):
         """
 		Draw a rectangle fading from one color to another
 		"""
-        tf_count, tf_vertices = self.triangle_strip(vertices)
+        count, vertices = self.vertex_array(vertices)
         self.batch.add_indexed(4, gl.GL_TRIANGLES, self.blended,
             [0, 1, 3, 0, 3, 2],
-            ('v2f', tf_vertices),
+            ('v2f', vertices),
             ('c4f', self.c4f_arr(color1) * 2 + self.c4f_arr(color2) * 2)
         )
 
@@ -365,6 +384,15 @@ class PygletDraw(b2Draw):
         self.batch.add(tf_count, gl.GL_TRIANGLES, self.blended,
                        ('v2f', tf_vertices),
                        ('c4f', tri_color * (tf_count // 3)))
+
+    def DrawGradientArc(self, center, radius, angle_start, angle_end, color_mid, color_out):
+        tf_count, tf_vertices = self.getArcVertices(center, radius, angle_start, angle_end)
+        tri_color = self.c4f_arr(color_mid) + self.c4f_arr(color_out) * 2
+
+        self.batch.add(tf_count, gl.GL_TRIANGLES, self.blended,
+                       ('v2f', tf_vertices),
+                       ('c4f', tri_color * (tf_count // 3)))
+
 
     def DrawSegment(self, p1, p2, color):
         """

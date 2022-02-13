@@ -11,11 +11,11 @@ class PilotAction:
 			"power": power
 		}
 
-	def scan_area(self, direction: float, angle: float, radius: float):
+	def scan_area(self, radius: float, direction: float, angle: float, ):
 		self.scan_action = {
+			"radius": radius,
 			"direction": direction,
-			"angle": angle,
-			"radius": radius
+			"angle": angle
 		}
 
 	def shoot_rocket(self, angle: float):
