@@ -1,4 +1,6 @@
-from Box2D import b2World, b2FixtureDef, b2CircleShape, b2Vec2, b2Color, b2Draw, b2Body
+import numpy as np
+
+from Box2D import b2World, b2FixtureDef, b2CircleShape, b2Vec2, b2Color, b2Draw
 
 from game.boxSpaceship import BoxSpaceship
 
@@ -8,6 +10,7 @@ class BoxRocket:
 	def __init__(self,
 	             world: b2World,
 	             shooter: BoxSpaceship,
+	             heading: b2Vec2,
 	             radius: float = .75):
 		self.shooter = shooter
 		self.world = world
@@ -25,8 +28,8 @@ class BoxRocket:
 			userData=self,  # adds a reference on the body to the rocket object
 			allowSleep=True,
 			position=shooter.get_location().get_position(),
-			angle=shooter.get_location().get_rotation(),
-			linearVelocity=shooter.get_location().get_direction() * 30,
+			angle=np.arctan2(heading.y, heading.x),
+			linearVelocity=heading,
 			fixtures=b2FixtureDef(
 				shape=b2CircleShape(radius=radius),
 				isSensor=True,

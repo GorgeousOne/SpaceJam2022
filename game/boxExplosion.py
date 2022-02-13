@@ -8,7 +8,7 @@ from Box2D import b2Color, b2Draw, b2Vec2
 class BoxExplosion:
 
 	def __init__(self, pos: b2Vec2, radius: float, duration: float = 1, color: b2Color = b2Color(1, 1, 1)):
-		self.pos = pos
+		self.pos = b2Vec2(pos)
 		self.radius = radius
 		self.duration = datetime.timedelta(seconds=duration)
 		self.color = b2Color(color)

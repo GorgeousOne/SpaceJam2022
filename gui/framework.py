@@ -337,8 +337,8 @@ class FrameworkBase(b2ContactListener):
             self.world.DestroyJoint(self.mouseJoint)
             self.mouseJoint = None
 
-        if self.bombSpawning:
-            self.CompleteBombSpawn(p)
+        # if self.bombSpawning:
+        #     self.CompleteBombSpawn(p)
 
     def MouseMove(self, p):
         """

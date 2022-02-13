@@ -22,6 +22,6 @@ def is_loc_in_scan(loc: Location, direction: float, angle: float, radius: float,
 
 	if np.linalg.norm(dist_vec) > radius:
 		return False
-	angle_to_loc = np.arctan2(dist_vec[1], dist_vec[0])
-	rel_angle = wrap_to_pi(angle_to_loc - direction)
+	angle_towards_loc = np.arctan2(dist_vec[1], dist_vec[0])
+	rel_angle = wrap_to_pi(angle_towards_loc - direction)
 	return abs(rel_angle) - angle / 2 <= EPSILON

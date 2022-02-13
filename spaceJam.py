@@ -1,14 +1,18 @@
 from typing import Tuple
 
-from Box2D import b2Color
+import numpy as np
+from Box2D import b2Color, b2Vec2
 
 from game.boxBorder import BoxBorder
 from game.boxContactListener import BoxContactListener
 from game.boxRocket import BoxRocket
 from game.boxSpaceship import BoxSpaceship
+from game.gameHandler import GameHandler
 from game.pilotHandler import PilotHandler
 from gui.framework import (Framework, main)
 from logic.pilot.afkPilot import AfkPilot
+from logic.pilot.circlePilot import CirclePilot
+from logic.spaceshipPilot import SpaceshipPilot
 
 
 class SpaceJam(Framework):
@@ -20,17 +24,25 @@ class SpaceJam(Framework):
 		self.windowSize = 800
 		self.window.set_size(self.windowSize, self.windowSize)
 		self.window.set_caption("Space Jam")
-		self.pilotHandler = PilotHandler()
+		self.gameSize = 100
+		self.frameCount = 0
+
 		self.contactHandler = BoxContactListener(self.world)
 		self.world.contactListener = self.contactHandler
 
-		self.gameSize = 100
-		self._create_battlefield()
+		self.pilotHandler = PilotHandler()
+		self.gameHandler = GameHandler(self.world, self.contactHandler)
 
-		self.spawn_ship((-25, 0))
-		self.spawn_ship((25, 0), b2Color(0.26, 0.53, 0.96))
+		self._create_battlefield()
+		self.spawn_ship(AfkPilot(self.gameSize), (25, 50))
+		self.spawn_ship(CirclePilot(self.gameSize), (75, 50), b2Color(0.26, 0.53, 0.96))
 
 	def Redraw(self):
+		self.frameCount += 1
+
+		if self.frameCount % (self.settings.hz // 5) == 0:
+			self.gameHandler.update()
+
 		self.contactHandler.remove_bodies()
 		self.border.display(self.renderer)
 
@@ -45,14 +57,18 @@ class SpaceJam(Framework):
 		self.world.gravity = (0.0, 0.0)
 		self.border = BoxBorder(self.world, self.gameSize, 1)
 		self.setZoom((self.gameSize + 4) / 50)
+		self.viewCenter.x = self.gameSize/2
+		self.viewCenter.y = self.gameSize/2
 
-	def spawn_ship(self, pos: Tuple[float, float] = (0, 0), fill: b2Color = b2Color(1, 0.73, 0)):
-		self.contactHandler.add_spaceship(BoxSpaceship(self.world, AfkPilot(), 60, pos, fill))
+	def spawn_ship(self, pilot: SpaceshipPilot, pos: Tuple[float, float] = (0, 0), fill: b2Color = b2Color(1, 0.73, 0)):
+		self.contactHandler.add_spaceship(BoxSpaceship(self.world, pilot, 60, pos, fill))
 
 	def Keyboard(self, key):
 		if key == 32:
 			for ship in self.contactHandler.spaceships:
-				rocket = BoxRocket(self.world, ship)
+				# heading = ship.get_location().get_direction() * 30
+				heading = b2Vec2(np.cos(ship.body.angle), np.sin(ship.body.angle)) * 30
+				rocket = BoxRocket(self.world, ship, heading)
 				self.contactHandler.add_rocket(rocket)
 
 

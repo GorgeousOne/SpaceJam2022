@@ -6,28 +6,27 @@ class BoxBorder:
 	def __init__(self, world: b2World, size: float, thickness: float):
 		self.size = size
 		self.thickness = thickness
-		self.body = world.CreateBody(position=(0, 0))
 		self.fill = b2Color(255, 255, 255)
+		self.body = world.CreateBody(position=(0, 0))
 
-		extent = size/2
 		self.body.CreateEdgeChain(
-			[(-extent, -extent),
-			 (-extent, extent),
-			 (extent, extent),
-			 (extent, -extent),
-			 (-extent, -extent)]
+			[(0, 0),
+			 (0, size),
+			 (size, size),
+			 (size, 0),
+			 (0, 0)]
 		)
 		self.displayVertices = [
-			(-extent, -extent),
-			(-extent - thickness, -extent - thickness),
-			(-extent, extent),
-			(-extent - thickness, extent + thickness),
-			(extent, extent),
-			(extent + thickness, extent + thickness),
-			(extent, -extent),
-			(extent + thickness, -extent - thickness),
-			(-extent, -extent),
-			(-extent - thickness, -extent - thickness),
+			(0, 0),
+			(0 - thickness, 0 - thickness),
+			(0, size),
+			(0 - thickness, size + thickness),
+			(size, size),
+			(size + thickness, size + thickness),
+			(size, 0),
+			(size + thickness, 0 - thickness),
+			(0, 0),
+			(0 - thickness, 0 - thickness),
 		]
 
 	def display(self, renderer: b2Draw):

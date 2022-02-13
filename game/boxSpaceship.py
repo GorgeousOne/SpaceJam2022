@@ -1,7 +1,7 @@
 from typing import Tuple, List
 
 import numpy as np
-from Box2D import (b2World, b2PolygonShape, b2FixtureDef, b2Draw, b2Color, b2Body)
+from Box2D import (b2World, b2PolygonShape, b2FixtureDef, b2Draw, b2Color, b2Body, b2Vec2)
 
 from logic.location import Location
 from logic.pilotAction import PilotAction
@@ -29,19 +29,21 @@ class BoxSpaceship:
 			shapes=[self.shape],
 			shapeFixture=b2FixtureDef(
 				restitution = 0.2, # bounciness between 0 and 1
-				density=2.0 # wanna find out what this does
+				density=.1 # wanna find out what this does
 			),
-			# fixedRotation=True # fixes angular velocity to one value
+			fixedRotation=True # fixes angular velocity to one value
 		)
-		# self.body.linearVelocity += b2Vec2(20, 1)
-		# self.body.angularVelocity += np.pi
 
 	def update(self, new_energy) -> PilotAction:
 		self.energy = new_energy
 		return self.pilot.update(self.get_location(), self.health, self.energy)
 
-	def process_scan(self, located_rockets: List[Location]) -> PilotAction:
-		return self.pilot.process_scan(located_rockets)
+	def process_scan(self, current_action: PilotAction, located_rockets: List[Location]) -> PilotAction:
+		return self.pilot.process_scan(current_action, located_rockets)
+
+	def move(self, impulse: b2Vec2):
+		self.body.angle = np.arctan2(impulse.y, impulse.x)
+		self.body.ApplyForceToCenter(impulse, True)
 
 	def damage(self, amount: int):
 		self.health -= amount

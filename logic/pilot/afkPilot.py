@@ -1,3 +1,5 @@
+from typing import List
+
 from logic.location import Location
 from logic.pilotAction import PilotAction
 from logic.spaceshipPilot import SpaceshipPilot
@@ -9,4 +11,7 @@ class AfkPilot(SpaceshipPilot):
 		super().__init__(level_width, spaceship_size)
 
 	def update(self, current_location: Location, current_health: float, current_energy: float) -> PilotAction:
+		pass
+
+	def process_scan(self, current_action: PilotAction, located_rockets: List[Location]) -> PilotAction:
 		pass
