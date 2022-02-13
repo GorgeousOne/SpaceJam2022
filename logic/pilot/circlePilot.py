@@ -11,27 +11,43 @@ class CirclePilot(SpaceshipPilot):
 
 	def __init__(self, level_width=0, spaceship_size=0):
 		super().__init__(level_width, spaceship_size)
-		self.centerVec = np.array([self.level_width / 2, self.level_width / 2])
+		self.center = np.array([self.level_width / 2, self.level_width / 2])
+		self.updateCount = 0
+		self.speed = 5
+		self.radius = 30
+		self.angleStep = self.speed / self.radius
+
+		self.startAngle = 0
 
 	def update(self, current_location: Location, current_health: float, current_energy: float) -> PilotAction:
+		self.updateCount += 1
+
 		action = PilotAction()
-		pos_vec = current_location.get_position()
-		dist_vec = self.centerVec - pos_vec
+		pos = current_location.get_position()
 
-		dist = np.linalg.norm(dist_vec)
-		angle_to_mid = np.arctan2(dist_vec[1], dist_vec[0])
+		if self.updateCount == 1:
+			self.startAngle = vec_angle(pos - self.center)
 
-		action.move_spaceship(angle_to_mid + np.pi/4, np.power(self.level_width - dist, 2))
-		action.shoot_rocket(angle_to_mid + np.pi)
+		angle = self.startAngle + self.updateCount * self.angleStep
+		target = self.center + np.array([np.cos(angle), np.sin(angle)]) * self.radius
+		vel = current_location.get_velocity()
+		impulse = target - (pos + vel)
+		action.move_spaceship(vec_angle(impulse), np.linalg.norm(impulse))
+
+		if self.updateCount % 5 == 0:
+			action.shoot_rocket(angle)
 		return action
 
 	def process_scan(self, current_action: PilotAction, located_rockets: List[Location]) -> PilotAction:
 		pass
 
 
-def norm_vec(vector):
+def vec_angle(vec: np.ndarray):
+	return np.arctan2(vec[1], vec[0])
+
+def norm_vec(vec: np.ndarray):
 	""" Returns the normal vector of the vector.  """
-	return vector / np.linalg.norm(vector)
+	return vec / np.linalg.norm(vec)
 
 
 def angle_between(v1: np.ndarray, v2: np.ndarray):

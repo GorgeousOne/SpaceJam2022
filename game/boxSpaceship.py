@@ -29,7 +29,7 @@ class BoxSpaceship:
 			shapes=[self.shape],
 			shapeFixture=b2FixtureDef(
 				restitution = 0.2, # bounciness between 0 and 1
-				density=.1 # wanna find out what this does
+				# density= 1.0
 			),
 			fixedRotation=True # fixes angular velocity to one value
 		)
@@ -42,8 +42,10 @@ class BoxSpaceship:
 		return self.pilot.process_scan(current_action, located_rockets)
 
 	def move(self, impulse: b2Vec2):
-		self.body.angle = np.arctan2(impulse.y, impulse.x)
-		self.body.ApplyForceToCenter(impulse, True)
+		# self.body.angle = np.arctan2(impulse.y, impulse.x)
+		self.body.linearVelocity += impulse
+		if self.body.linearVelocity.y != 0 or self.body.linearVelocity.x != 0:
+			self.body.angle = np.arctan2(self.body.linearVelocity.y, self.body.linearVelocity.x)
 
 	def damage(self, amount: int):
 		self.health -= amount
@@ -56,6 +58,7 @@ class BoxSpaceship:
 		return Location(np.array([pos.x, pos.y]), self.body.angle, np.array([vel.x, vel.y]))
 
 	def display(self, renderer: b2Draw):
+		# self.body.angle = np.arctan2(self.body.linearVelocity.y, self.body.linearVelocity.x)
 		vertices = []
 
 		for v in self.shape.vertices:

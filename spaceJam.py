@@ -34,7 +34,7 @@ class SpaceJam(Framework):
 		self.gameHandler = GameHandler(self.world, self.contactHandler)
 
 		self._create_battlefield()
-		self.spawn_ship(AfkPilot(self.gameSize), (25, 50))
+		self.spawn_ship(CirclePilot(self.gameSize), (25, 50))
 		self.spawn_ship(CirclePilot(self.gameSize), (75, 50), b2Color(0.26, 0.53, 0.96))
 
 	def Redraw(self):
