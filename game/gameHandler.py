@@ -19,7 +19,7 @@ class GameHandler:
 		self.contact_listener = contact_listener
 		self.rocket_speed = 10
 		self.tick_energy = 100
-		self.colorScanSuccess = b2Color(1, .3, .3)
+		self.colorScanSuccess = b2Color(1, .2, .2)
 
 	def update(self):
 		for spaceship in self.contact_listener.spaceships:
@@ -78,7 +78,6 @@ class GameHandler:
 		if not action:
 			return
 
-		self.handle_pilot_action(spaceship, action)
 		# except Exception as e:
 		# 	print(str(e))
 		# 	return

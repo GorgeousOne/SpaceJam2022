@@ -35,12 +35,13 @@ class CirclePilot(SpaceshipPilot):
 		action.move_spaceship(vec_angle(impulse), np.linalg.norm(impulse))
 
 		if self.updateCount % 5 == 0:
-			action.shoot_rocket(angle)
-			action.scan_area(50, vec_angle(self.center - pos), np.pi / 8)
+			center_dir = vec_angle(self.center - pos)
+			action.shoot_rocket(center_dir - np.pi/2)
+			action.scan_area(50, center_dir, np.pi / 8)
 		return action
 
 	def process_scan(self, current_action: PilotAction, located_rockets: List[Location]) -> PilotAction:
-		pass
+		return current_action
 
 
 def vec_angle(vec: np.ndarray):
