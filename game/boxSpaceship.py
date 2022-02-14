@@ -1,12 +1,64 @@
 from typing import Tuple, List
 
 import numpy as np
-from Box2D import (b2World, b2PolygonShape, b2FixtureDef, b2Draw, b2Color, b2Body, b2Vec2)
+from Box2D import (b2World, b2PolygonShape, b2FixtureDef, b2Draw, b2Color, b2Vec2)
 
 from logic.location import Location
 from logic.pilotAction import PilotAction
 from logic.spaceshipPilot import SpaceshipPilot
 
+hitbox = [
+	(-1.37, -0.58),
+	(-1.89, -0.43),
+	(-1.89, 0.43),
+	(-1.37, 0.58),
+	(0.31, 1.00),
+	(1.54, 0.91),
+	(2.45, 0.59),
+	(3.11, 0.00),
+	(2.45, -0.59),
+	(1.54, -0.91),
+	(0.31, -1.00)
+]
+
+viewbox = [
+	(0.00, 0.00),
+	(0.13, -0.31),
+	(0.44, -0.44),
+	(0.31, -1.00),
+	(-0.33, -1.42),
+	(-1.11, -1.52),
+	(-1.74, -1.39),
+	(-1.50, -0.95),
+	(-1.29, -0.87),
+	(-1.37, -0.58),
+	(-1.89, -0.43),
+	(-1.89, 0.43),
+	(-1.37, 0.58),
+	(-1.29, 0.87),
+	(-1.50, 0.95),
+	(-1.74, 1.39),
+	(-1.11, 1.52),
+	(-0.33, 1.42),
+	(0.31, 1.00),
+	(1.54, 0.91),
+	(2.45, 0.59),
+	(3.11, 0.00),
+	(2.45, -0.59),
+	(1.54, -0.91),
+	(0.31, -1.00),
+	(0.44, -0.44),
+	(0.75, -0.31),
+	(0.88, 0.00),
+	(0.75, 0.31),
+	(0.44, 0.44),
+	(0.13, 0.31)
+]
+
+import tripy
+viewbox_triangles = tripy.earclip(viewbox)
+triangle_indices = [viewbox.index(v) for t in viewbox_triangles for v in t]
+viewbox = [b2Vec2(v[0], v[1]) for v in viewbox]
 
 class BoxSpaceship:
 
@@ -16,22 +68,22 @@ class BoxSpaceship:
 		self.energy = 0
 
 		self.color = b2Color(color)
-		self.shape = b2PolygonShape(vertices=[
-			(2.618, 0),
-			(0, -1),
-			(-1, 0),
-			(0, 1),
-		])
+		self.shape = b2PolygonShape(vertices=hitbox)
+		# self.shape = b2PolygonShape(vertices=[
+		# 	(2.618, 0),
+		# 	(0, -1),
+		# 	(-1, 0),
+		# 	(0, 1),
+		# ])
 		self.body = world.CreateDynamicBody(
 			userData=self,  # adds a reference on the body to the spaceship object
 			position=pos,
 			linearDamping=0,
 			shapes=[self.shape],
 			shapeFixture=b2FixtureDef(
-				restitution = 0.2, # bounciness between 0 and 1
-				# density= 1.0
+				restitution=0.2,  # bounciness between 0 and 1
 			),
-			fixedRotation=True # fixes angular velocity to one value
+			fixedRotation=True  # fixes angular velocity to one value
 		)
 
 	def update(self, new_energy) -> PilotAction:
@@ -61,6 +113,8 @@ class BoxSpaceship:
 		# self.body.angle = np.arctan2(self.body.linearVelocity.y, self.body.linearVelocity.x)
 		vertices = []
 
-		for v in self.shape.vertices:
+		# for v in self.shape.vertices:
+		for v in viewbox:
 			vertices.append(self.body.GetWorldPoint(v))
-		renderer.DrawSolidPolygon(vertices, self.color)
+		# renderer.DrawSolidPolygon(vertices, self.color)
+		renderer.DrawIndexedTriangles(vertices, triangle_indices, self.color)

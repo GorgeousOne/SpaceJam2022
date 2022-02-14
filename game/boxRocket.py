@@ -11,7 +11,7 @@ class BoxRocket:
 	             world: b2World,
 	             shooter: BoxSpaceship,
 	             heading: b2Vec2,
-	             radius: float = .75):
+	             radius: float = 1.0):
 		self.shooter = shooter
 		self.world = world
 		self.radius = radius

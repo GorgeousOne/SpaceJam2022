@@ -2,3 +2,4 @@ Box2D
 pyglet
 numpy
 box2d-kengz
+tripy

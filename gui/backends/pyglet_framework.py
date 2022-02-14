@@ -359,6 +359,14 @@ class PygletDraw(b2Draw):
                        # ('c4f', [0.5 * color.r, 0.5 * color.g, 0.5 * color.b, 0.5] * (tf_count)))
                        ('c4f', [color.r, color.g, color.b, 1.0] * (ts_count)))
 
+    def DrawIndexedTriangles(self, vertices, indices, color):
+        count, vertex_arr = self.vertex_array(vertices)
+        self.batch.add_indexed(count, gl.GL_TRIANGLES, self.blended,
+            indices,
+            ('v2f', vertex_arr),
+            ('c4f', self.c4f_arr(color) * count)
+        )
+
     def c4f_arr(self, color: b2Color):
         return [color.r, color.g, color.b, getattr(color, "a", 1.0)]
 
