@@ -4,6 +4,7 @@ import numpy as np
 from Box2D import b2Color, b2Vec2
 
 from game.boxBorder import BoxBorder
+from game.boxBackground import BoxBackground
 from game.boxContactListener import BoxContactListener
 from game.boxRocket import BoxRocket
 from game.boxSpaceship import BoxSpaceship
@@ -21,7 +22,7 @@ class SpaceJam(Framework):
 	def __init__(self):
 		super(SpaceJam, self).__init__()
 
-		self.windowSize = 800
+		self.windowSize = 600
 		self.window.set_size(self.windowSize, self.windowSize)
 		self.window.set_caption("Space Jam")
 		self.gameSize = 100
@@ -45,6 +46,7 @@ class SpaceJam(Framework):
 
 		self.contactHandler.remove_bodies()
 		self.border.display(self.renderer)
+		self.background.display(self.renderer, self.frameCount)
 
 		for explosion in self.contactHandler.explosions:
 			explosion.display(self.renderer)
@@ -58,6 +60,7 @@ class SpaceJam(Framework):
 	def _create_battlefield(self):
 		self.world.gravity = (0.0, 0.0)
 		self.border = BoxBorder(self.world, self.gameSize, 1)
+		self.background = BoxBackground(self.world, self.gameSize, 1)
 		self.setZoom((self.gameSize + 4) / 50)
 		self.viewCenter.x = self.gameSize/2
 		self.viewCenter.y = self.gameSize/2
