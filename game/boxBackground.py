@@ -19,5 +19,5 @@ class BoxBackground:
 		for star in self.stars:
 			luminance = (0.5 * math.sin(frameCount/100 * star["frequency"]) + 0.5)
 			color = b2Color(luminance, luminance, luminance + 0.1)
-			renderer.DrawPoint([star["position"]["x"], star["position"]["y"]], (self.size/10) * star["magnitude"], color)
+			renderer.DrawPoint([star["position"]["x"], star["position"]["y"]], (self.size/30) * star["magnitude"], color)
 		
