@@ -39,14 +39,14 @@ class BoxRocket:
 
 	def _create_shadow(self, length):
 		self.shadowVerts = [
-			b2Vec2(0, self.radius),
 			b2Vec2(0, -self.radius),
+			b2Vec2(0, self.radius),
 			b2Vec2(-length, self.radius),
 			b2Vec2(-length, -self.radius)
 		]
 
 	def display(self, renderer: b2Draw):
-		transparent = b2Color()
+		transparent = b2Color(self.color)
 		transparent.a = 0
 		renderer.DrawGradientRect(self._get_shadow_verts_translated(), self.shadowColor, transparent)
 		renderer.DrawSolidCircle(self.body.GetWorldPoint(b2Vec2()), self.radius, b2Vec2(), self.color)

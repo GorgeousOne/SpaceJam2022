@@ -376,7 +376,7 @@ class PygletDraw(b2Draw):
 		"""
         count, vertices = self.vertex_array(vertices)
         self.batch.add_indexed(4, gl.GL_TRIANGLES, self.blended,
-            [0, 1, 3, 0, 3, 2],
+            [0, 1, 2, 0, 2, 3],
             ('v2f', vertices),
             ('c4f', self.c4f_arr(color1) * 2 + self.c4f_arr(color2) * 2)
         )

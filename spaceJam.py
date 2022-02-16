@@ -60,7 +60,8 @@ class SpaceJam(Framework):
 	def _create_battlefield(self):
 		self.world.gravity = (0.0, 0.0)
 		self.border = BoxBorder(self.world, self.gameSize, 1)
-		self.background = BoxBackground(self.world, self.gameSize, 1)
+		self.background = BoxBackground(self.gameSize)
+
 		self.setZoom((self.gameSize + 4) / 50)
 		self.viewCenter.x = self.gameSize/2
 		self.viewCenter.y = self.gameSize/2
