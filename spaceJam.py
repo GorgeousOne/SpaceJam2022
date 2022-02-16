@@ -10,13 +10,14 @@ from game.boxRocket import BoxRocket
 from game.boxSpaceship import BoxSpaceship
 from game.gameHandler import GameHandler
 from game.pilotHandler import PilotHandler
-from gui.framework import (Framework, main)
+from gui.backends.pyglet_framework import PygletFramework
+from gui.framework import main
 from logic.pilot.afkPilot import AfkPilot
 from logic.pilot.circlePilot import CirclePilot
 from logic.spaceshipPilot import SpaceshipPilot
 
 
-class SpaceJam(Framework):
+class SpaceJam(PygletFramework):
 	name = "Space Jam"
 
 	def __init__(self):
@@ -45,17 +46,20 @@ class SpaceJam(Framework):
 			self.gameHandler.update()
 
 		self.contactHandler.remove_bodies()
-		self.border.display(self.renderer)
-		self.background.display(self.renderer, self.frameCount)
 
-		for explosion in self.contactHandler.explosions:
-			explosion.display(self.renderer)
-		for scan in self.contactHandler.scans:
-			scan.display(self.renderer)
-		for rocket in self.contactHandler.rockets:
-			rocket.display(self.renderer)
+		# try to keep the amount of layers low :P
 		for ship in self.contactHandler.spaceships:
-			ship.display(self.renderer)
+			ship.display(self.renderer, 0)
+		for explosion in self.contactHandler.explosions:
+			explosion.display(self.renderer, 1)
+		for scan in self.contactHandler.scans:
+			scan.display(self.renderer, 1)
+		for rocket in self.contactHandler.rockets:
+			rocket.display(self.renderer, 1)
+
+		self.border.display(self.renderer, 0)
+		self.background.display(self.renderer, 2, self.frameCount)
+
 
 	def _create_battlefield(self):
 		self.world.gravity = (0.0, 0.0)

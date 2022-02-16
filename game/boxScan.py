@@ -1,7 +1,9 @@
 import datetime
 import math
 
-from Box2D import b2Color, b2Draw, b2Vec2
+from Box2D import b2Color, b2Vec2
+
+from gui.backends.pyglet_framework import PygletDraw
 
 
 class BoxScan:
@@ -20,7 +22,7 @@ class BoxScan:
 		dt = datetime.datetime.now() - self.start
 		return dt > self.duration
 
-	def display(self, renderer: b2Draw):
+	def display(self, renderer: PygletDraw, layer_index: int):
 		dt = datetime.datetime.now() - self.start
 		if dt > self.duration:
 			return
@@ -30,4 +32,4 @@ class BoxScan:
 		color_out = b2Color(self.color)
 		color_out.a = 0.2 * fade
 
-		renderer.DrawGradientArc(self.pos, self.radius, self.angleStart, self.angleEnd, color_mid, color_out)
+		renderer.DrawGradientArc(layer_index, self.pos, self.radius, self.angleStart, self.angleEnd, color_mid, color_out)

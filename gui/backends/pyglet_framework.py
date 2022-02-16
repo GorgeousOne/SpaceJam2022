@@ -18,6 +18,7 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
+# This was plainly altered by Aaron
 
 """
 Global Keys:
@@ -37,6 +38,7 @@ You can easily add your own tests based on test_empty.
 """
 import string
 import math
+from collections import OrderedDict
 
 import pyglet
 from pyglet import gl
@@ -120,14 +122,23 @@ class PygletDraw(b2Draw):
     def __init__(self, test):
         super(PygletDraw, self).__init__()
         self.test = test
+        self.layers = {}
+
+    def clear_layers(self):
+        self.layers.clear()
+
+    def get_or_create_layer(self, layer_index) -> pyglet.graphics.Batch:
+        if layer_index not in self.layers.keys():
+            self.layers[layer_index] = pyglet.graphics.Batch()
+        return self.layers[layer_index]
 
     def StartDraw(self):
-        pass
+        for index in sorted(list(self.layers.keys()), reverse=True):
+            self.layers[index].draw()
 
     def EndDraw(self):
         pass
 
-    # Aaron
     def vertex_array(self, vertices):
         out = []
         for v in vertices:
@@ -256,7 +267,6 @@ class PygletDraw(b2Draw):
             ret_ll.extend((x + center[0], y + center[1]))
         return ret_tf, ret_ll
 
-    #Aaron
     def getArcVertices(self, center, radius, angle_start, angle_end):
         angle = angle_end - angle_start
         fan = []
@@ -268,63 +278,57 @@ class PygletDraw(b2Draw):
                 center[1] + math.sin(current_angle) * radius))
         return self.triangle_fan(fan)
 
-    def DrawCircle(self, center, radius, color):
+    def DrawCircle(self, layer_index, center, radius, color):
         """
         Draw an unfilled circle given center, radius and color.
         """
+        batch = self.get_or_create_layer(layer_index)
         unused, ll_vertices = self.getCircleVertices(
             center, radius, self.circle_segments)
         ll_count = len(ll_vertices) // 2
 
-        self.batch.add(ll_count, gl.GL_LINES, None,
+        batch.add(ll_count, gl.GL_LINES, None,
                        ('v2f', ll_vertices),
                        ('c4f', [color.r, color.g, color.b, 1.0] * ll_count))
 
-    def DrawSolidCircle(self, center, radius, axis, color):
+    def DrawSolidCircle(self, layer_index, center, radius, axis, color):
         """
         Draw an filled circle given center, radius, axis (of orientation) and color.
         """
+        batch = self.get_or_create_layer(layer_index)
         tf_vertices, ll_vertices = self.getCircleVertices(
             center, radius, self.circle_segments)
         tf_count, ll_count = len(tf_vertices) // 2, len(ll_vertices) // 2
 
-        self.batch.add(tf_count, gl.GL_TRIANGLES, self.blended,
+        batch.add(tf_count, gl.GL_TRIANGLES, self.blended,
                        ('v2f', tf_vertices),
                        ('c4f', [color.r, color.g, color.b, 1.0] * tf_count))
-                       # ('c4f', [0.5 * color.r, 0.5 * color.g, 0.5 * color.b, 0.5] * tf_count))
 
-        # self.batch.add(ll_count, gl.GL_LINES, None,
-        #                ('v2f', ll_vertices),
-        #                ('c4f', [color.r, color.g, color.b, 1.0] * (ll_count)))
-
-        # p = b2Vec2(center) + radius * b2Vec2(axis)
-        # self.batch.add(2, gl.GL_LINES, None,
-        #                ('v2f', (center[0], center[1], p[0], p[1])),
-        #                ('c3f', [1.0, 0.0, 0.0] * 2))
-
-    def DrawPolygon(self, vertices, color):
+    def DrawPolygon(self, layer_index, vertices, color):
         """
         Draw a wireframe polygon given the world vertices (tuples) with the specified color.
         """
+        batch = self.get_or_create_layer(layer_index)
         if len(vertices) == 2:
             p1, p2 = vertices
-            self.batch.add(2, gl.GL_LINES, None,
+            batch.add(2, gl.GL_LINES, None,
                            ('v2f', (p1[0], p1[1], p2[0], p2[1])),
                            ('c3f', [color.r, color.g, color.b] * 2))
         else:
             ll_count, ll_vertices = self.line_loop(vertices)
 
-            self.batch.add(ll_count, gl.GL_LINES, None,
+            batch.add(ll_count, gl.GL_LINES, None,
                            ('v2f', ll_vertices),
                            ('c4f', [color.r, color.g, color.b, 1.0] * (ll_count)))
 
-    def DrawSolidPolygon(self, vertices, color):
+    def DrawSolidPolygon(self, layer_index, vertices, color):
         """
         Draw a filled polygon given the world vertices (tuples) with the specified color.
         """
+        batch = self.get_or_create_layer(layer_index)
         if len(vertices) == 2:
             p1, p2 = vertices
-            self.batch.add(2, gl.GL_LINES, None,
+            batch.add(2, gl.GL_LINES, None,
                            ('v2f', (p1[0], p1[1], p2[0], p2[1])),
                            ('c3f', [color.r, color.g, color.b] * 2))
         else:
@@ -332,36 +336,22 @@ class PygletDraw(b2Draw):
             if tf_count == 0:
                 return
 
-            self.batch.add(tf_count, gl.GL_TRIANGLES, self.blended,
+            batch.add(tf_count, gl.GL_TRIANGLES, self.blended,
                            ('v2f', tf_vertices),
-                           # ('c4f', [0.5 * color.r, 0.5 * color.g, 0.5 * color.b, 0.5] * (tf_count)))
                            ('c4f', [color.r, color.g, color.b, 1.0] * (tf_count)))
 
-            # ll_count, ll_vertices = self.line_loop(vertices)
-            #
-            # self.batch.add(ll_count, gl.GL_LINES, None,
-            #                ('v2f', ll_vertices),
-            #                ('c4f', [color.r, color.g, color.b, 1.0] * ll_count))
-
-    def DrawSolidTriangleStrip(self, vertices, color):
-        # if len(vertices) == 2:
-        #     p1, p2 = vertices
-        #     self.batch.add(2, gl.GL_LINES, None,
-        #                    ('v2f', (p1[0], p1[1], p2[0], p2[1])),
-        #                    ('c3f', [color.r, color.g, color.b] * 2))
-        # else:
+    def DrawSolidTriangleStrip(self, layer_index, vertices, color):
+        batch = self.get_or_create_layer(layer_index)
         ts_count, ts_vertices = self.triangle_strip(vertices)
-            # if tf_count == 0:
-            #     return
 
-        self.batch.add(ts_count, gl.GL_TRIANGLES, self.blended,
+        batch.add(ts_count, gl.GL_TRIANGLES, self.blended,
                        ('v2f', ts_vertices),
-                       # ('c4f', [0.5 * color.r, 0.5 * color.g, 0.5 * color.b, 0.5] * (tf_count)))
                        ('c4f', [color.r, color.g, color.b, 1.0] * (ts_count)))
 
-    def DrawIndexedTriangles(self, vertices, indices, color):
+    def DrawIndexedTriangles(self, layer_index, vertices, indices, color):
+        batch = self.get_or_create_layer(layer_index)
         count, vertex_arr = self.vertex_array(vertices)
-        self.batch.add_indexed(count, gl.GL_TRIANGLES, self.blended,
+        batch.add_indexed(count, gl.GL_TRIANGLES, self.blended,
             indices,
             ('v2f', vertex_arr),
             ('c4f', self.c4f_arr(color) * count)
@@ -370,73 +360,80 @@ class PygletDraw(b2Draw):
     def c4f_arr(self, color: b2Color):
         return [color.r, color.g, color.b, getattr(color, "a", 1.0)]
 
-    def DrawGradientRect(self, vertices, color1, color2):
+    def DrawGradientRect(self, layer_index, vertices, color1, color2):
         """
 		Draw a rectangle fading from one color to another
 		"""
+        batch = self.get_or_create_layer(layer_index)
         count, vertices = self.vertex_array(vertices)
-        self.batch.add_indexed(4, gl.GL_TRIANGLES, self.blended,
+        batch.add_indexed(4, gl.GL_TRIANGLES, self.blended,
             [0, 1, 2, 0, 2, 3],
             ('v2f', vertices),
             ('c4f', self.c4f_arr(color1) * 2 + self.c4f_arr(color2) * 2)
         )
 
-    def DrawGradientCirc(self, center, radius, color_mid, color_out):
+    def DrawGradientCirc(self, layer_index, center, radius, color_mid, color_out):
         """
         Draw a circle fading from a center color color to a border color
         """
+        batch = self.get_or_create_layer(layer_index)
         tf_vertices, unused = self.getCircleVertices(center, radius, self.circle_segments)
         tf_count = len(tf_vertices) // 2
         tri_color = self.c4f_arr(color_mid) + self.c4f_arr(color_out) * 2
 
-        self.batch.add(tf_count, gl.GL_TRIANGLES, self.blended,
+        batch.add(tf_count, gl.GL_TRIANGLES, self.blended,
                        ('v2f', tf_vertices),
                        ('c4f', tri_color * (tf_count // 3)))
 
-    def DrawGradientArc(self, center, radius, angle_start, angle_end, color_mid, color_out):
+    def DrawGradientArc(self, layer_index, center, radius, angle_start, angle_end, color_mid, color_out):
+        batch = self.get_or_create_layer(layer_index)
         tf_count, tf_vertices = self.getArcVertices(center, radius, angle_start, angle_end)
         tri_color = self.c4f_arr(color_mid) + self.c4f_arr(color_out) * 2
 
-        self.batch.add(tf_count, gl.GL_TRIANGLES, self.blended,
+        batch.add(tf_count, gl.GL_TRIANGLES, self.blended,
                        ('v2f', tf_vertices),
                        ('c4f', tri_color * (tf_count // 3)))
 
 
-    def DrawSegment(self, p1, p2, color):
+    def DrawSegment(self, layer_index, p1, p2, color):
         """
         Draw the line segment from p1-p2 with the specified color.
         """
-        self.batch.add(2, gl.GL_LINES, None,
+        batch = self.get_or_create_layer(layer_index)
+        batch.add(2, gl.GL_LINES, None,
                        ('v2f', (p1[0], p1[1], p2[0], p2[1])),
                        ('c3f', [color.r, color.g, color.b] * 2))
 
-    def DrawXForm(self, xf):
+    def DrawXForm(self, layer_index, xf):
         """
         Draw the transform xf on the screen
         """
+        batch = self.get_or_create_layer(layer_index)
         p1 = xf.position
         k_axisScale = 0.4
         p2 = p1 + k_axisScale * xf.R.x_axis
         p3 = p1 + k_axisScale * xf.R.y_axis
 
-        self.batch.add(3, gl.GL_LINES, None,
+        batch.add(3, gl.GL_LINES, None,
                        ('v2f', (p1[0], p1[1], p2[0], p2[
                         1], p1[0], p1[1], p3[0], p3[1])),
                        ('c3f', [1.0, 0.0, 0.0] * 2 + [0.0, 1.0, 0.0] * 2))
 
-    def DrawPoint(self, p, size, color):
+    def DrawPoint(self, layer_index, p, size, color):
         """
         Draw a single point at point p given a point size and color.
         """
-        self.batch.add(1, gl.GL_POINTS, grPointSize(size),
+        batch = self.get_or_create_layer(layer_index)
+        batch.add(1, gl.GL_POINTS, grPointSize(size),
                        ('v2f', (p[0], p[1])),
                        ('c3f', [color.r, color.g, color.b]))
 
-    def DrawAABB(self, aabb, color):
+    def DrawAABB(self, layer_index, aabb, color):
         """
         Draw a wireframe around the AABB with the given color.
         """
-        self.renderer.batch.add(8, gl.GL_LINES, None,
+        batch = self.get_or_create_layer(layer_index)
+        batch.add(8, gl.GL_LINES, None,
                                 ('v2f', (aabb.lowerBound.x, aabb.lowerBound.y,
                                          aabb.upperBound.x, aabb.lowerBound.y,
                                          aabb.upperBound.x, aabb.lowerBound.y,
@@ -457,7 +454,6 @@ class PygletDraw(b2Draw):
 class PygletWindow(pyglet.window.Window):
 
     def __init__(self, test):
-        # adds 8-sample aliasing
         super(PygletWindow, self).__init__(config=pyglet.gl.Config(sample_buffers=1, samples=8))
         self.test = test
         self._isFirstDraw = True
@@ -476,7 +472,6 @@ class PygletWindow(pyglet.window.Window):
         """
         # updates projection on next draw
         self._isFirstDraw = True
-        # self.test.updateProjection()
 
     # adds projection update on first draw, doesn't work earlier somehow
     def on_draw(self):
@@ -516,10 +511,6 @@ class PygletWindow(pyglet.window.Window):
         Mouse scrollwheel used
         """
         pass
-        # if scroll_y < 0:
-        #     self.test.viewZoom *= 1.1
-        # elif scroll_y > 0:
-        #     self.test.viewZoom /= 1.1
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
         """
@@ -529,9 +520,6 @@ class PygletWindow(pyglet.window.Window):
         self.test.mouseWorld = p
 
         self.test.MouseMove(p)
-
-        # if buttons & pyglet.window.mouse.RIGHT:
-        #     self.test.viewCenter -= (float(dx) / 5, float(dy) / 5)
 
 
 class PygletFramework(FrameworkBase):
@@ -609,6 +597,7 @@ class PygletFramework(FrameworkBase):
 
         self.renderer = PygletDraw(self)
         self.renderer.surface = self.window.screen
+        # Aaron: everything will be rendered manually
         self.world.renderer = self.renderer
         self._viewCenter = b2Vec2(0, 0)
         self.groundbody = self.world.CreateBody()
@@ -682,7 +671,8 @@ class PygletFramework(FrameworkBase):
         self.window.push_handlers(self.keys)
 
         # Create a new batch for drawing
-        self.renderer.batch = pyglet.graphics.Batch()
+        # self.renderer.batch = pyglet.graphics.Batch()
+        self.renderer.clear_layers()
 
         # Reset the text position
         self.textLine = 15
@@ -692,7 +682,7 @@ class PygletFramework(FrameworkBase):
 
         # Step the physics
         self.Step(self.settings)
-        self.renderer.batch.draw()
+        self.renderer.StartDraw()
         self.window.invalid = True
 
         self.fps = pyglet.clock.get_fps()
@@ -728,23 +718,6 @@ class PygletFramework(FrameworkBase):
         I.e., they aren't just evaluated when first pressed down
         """
         pass
-        # keys = self.keys
-        # if keys[Keys.K_LEFT]:
-        #     self.viewCenter -= (0.5, 0)
-        # elif keys[Keys.K_RIGHT]:
-        #     self.viewCenter += (0.5, 0)
-        #
-        # if keys[Keys.K_UP]:
-        #     self.viewCenter += (0, 0.5)
-        # elif keys[Keys.K_DOWN]:
-        #     self.viewCenter -= (0, 0.5)
-        #
-        # if keys[Keys.K_HOME]:
-        #     self.viewZoom = 1.0
-        #     self.viewCenter = (0.0, 20.0)
-
-    # def Step(self, settings):
-    #    super(PygletFramework, self).Step(settings)
 
     def ConvertScreenToWorld(self, x, y):
         """

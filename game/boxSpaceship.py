@@ -1,8 +1,9 @@
 from typing import Tuple, List
 
 import numpy as np
-from Box2D import (b2World, b2PolygonShape, b2FixtureDef, b2Draw, b2Color, b2Vec2)
+from Box2D import (b2World, b2PolygonShape, b2FixtureDef, b2Color, b2Vec2)
 
+from gui.backends.pyglet_framework import PygletDraw
 from logic.location import Location
 from logic.pilotAction import PilotAction
 from logic.spaceshipPilot import SpaceshipPilot
@@ -109,7 +110,7 @@ class BoxSpaceship:
 		vel = self.body.linearVelocity
 		return Location(np.array([pos.x, pos.y]), self.body.angle, np.array([vel.x, vel.y]))
 
-	def display(self, renderer: b2Draw):
+	def display(self, renderer: PygletDraw, layer_index: int):
 		# self.body.angle = np.arctan2(self.body.linearVelocity.y, self.body.linearVelocity.x)
 		vertices = []
 
@@ -117,4 +118,4 @@ class BoxSpaceship:
 		for v in viewbox:
 			vertices.append(self.body.GetWorldPoint(v))
 		# renderer.DrawSolidPolygon(vertices, self.color)
-		renderer.DrawIndexedTriangles(vertices, triangle_indices, self.color)
+		renderer.DrawIndexedTriangles(layer_index, vertices, triangle_indices, self.color)

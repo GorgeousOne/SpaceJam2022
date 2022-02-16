@@ -1,8 +1,9 @@
 import numpy as np
 
-from Box2D import b2World, b2FixtureDef, b2CircleShape, b2Vec2, b2Color, b2Draw
+from Box2D import b2World, b2FixtureDef, b2CircleShape, b2Vec2, b2Color
 
 from game.boxSpaceship import BoxSpaceship
+from gui.backends.pyglet_framework import PygletDraw
 
 
 class BoxRocket:
@@ -45,11 +46,11 @@ class BoxRocket:
 			b2Vec2(-length, -self.radius)
 		]
 
-	def display(self, renderer: b2Draw):
+	def display(self, renderer: PygletDraw, layer_index: int):
 		transparent = b2Color(self.color)
 		transparent.a = 0
-		renderer.DrawGradientRect(self._get_shadow_verts_translated(), self.shadowColor, transparent)
-		renderer.DrawSolidCircle(self.body.GetWorldPoint(b2Vec2()), self.radius, b2Vec2(), self.color)
+		renderer.DrawGradientRect(layer_index, self._get_shadow_verts_translated(), self.shadowColor, transparent)
+		renderer.DrawSolidCircle(layer_index, self.body.GetWorldPoint(b2Vec2()), self.radius, b2Vec2(), self.color)
 
 	def _get_shadow_verts_translated(self):
 		return [self.body.GetWorldPoint(v) for v in self.shadowVerts]

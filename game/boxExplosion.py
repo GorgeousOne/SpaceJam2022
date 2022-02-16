@@ -2,7 +2,9 @@ import datetime
 import math
 from typing import Tuple
 
-from Box2D import b2Color, b2Draw, b2Vec2
+from Box2D import b2Color, b2Vec2
+
+from gui.backends.pyglet_framework import PygletDraw
 
 
 class BoxExplosion:
@@ -19,7 +21,7 @@ class BoxExplosion:
 		dt = datetime.datetime.now() - self.start
 		return dt > self.duration
 
-	def display(self, renderer: b2Draw):
+	def display(self, renderer: PygletDraw, layer_index: int):
 		dt = datetime.datetime.now() - self.start
 		if dt > self.duration:
 			return
@@ -28,5 +30,5 @@ class BoxExplosion:
 		color_out = b2Color(self.color)
 		color_mid.a = 0.2 * (1 - scale)
 		color_out.a = (1 - scale)
-		renderer.DrawGradientCirc(self.pos, self.radius * scale, color_mid, color_out)
+		renderer.DrawGradientCirc(layer_index, self.pos, self.radius * scale, color_mid, color_out)
 

@@ -18,6 +18,7 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
+# This was plainly altered by Aaron
 """
 The framework's base is FrameworkBase. See its help for more information.
 """
@@ -210,15 +211,15 @@ class FrameworkBase(b2ContactListener):
         if renderer:
             # If there's a mouse joint, draw the connection between the object
             # and the current pointer position.
-            if self.mouseJoint:
-                p1 = renderer.to_screen(self.mouseJoint.anchorB)
-                p2 = renderer.to_screen(self.mouseJoint.target)
-
-                renderer.DrawPoint(p1, settings.pointSize,
-                                   self.colors['mouse_point'])
-                renderer.DrawPoint(p2, settings.pointSize,
-                                   self.colors['mouse_point'])
-                renderer.DrawSegment(p1, p2, self.colors['joint_line'])
+            # if self.mouseJoint:
+            #     p1 = renderer.to_screen(self.mouseJoint.anchorB)
+            #     p2 = renderer.to_screen(self.mouseJoint.target)
+            #
+            #     renderer.DrawPoint(p1, settings.pointSize,
+            #                        self.colors['mouse_point'])
+            #     renderer.DrawPoint(p2, settings.pointSize,
+            #                        self.colors['mouse_point'])
+            #     renderer.DrawSegment(p1, p2, self.colors['joint_line'])
 
             # Draw the slingshot bomb
             # if self.bombSpawning:
@@ -286,7 +287,6 @@ class FrameworkBase(b2ContactListener):
                                      sum(self.t_steps) / len(self.t_steps))
                                )
 
-    # added by Aaron
     def Redraw(self):
         """
         Function for drawing logic. Displays default debug data if not overwritten.
@@ -529,15 +529,15 @@ if __name__ == '__main__':
 # framework, then your file should be 'backends/foobar_framework.py' and you
 # should have a class 'FoobarFramework' that subclasses FrameworkBase. Ensure
 # proper capitalization for portability.
-from gui import backends
-
-try:
-    framework_name = '%s_framework' % (fwSettings.backend.lower())
-    __import__('backends', globals(), fromlist=[framework_name], level=1)
-    framework_module = getattr(backends, framework_name)
-    Framework = getattr(framework_module, '%sFramework' % fwSettings.backend.capitalize())
-except Exception as ex:
-    print('Unable to import the back-end %s: %s' % (fwSettings.backend, ex))
-    print('Attempting to fall back on the pyglet back-end.')
-
-    from Box2D.examples.backends.pyglet_framework import PygletFramework as Framework
+# from gui import backends
+#
+# try:
+#     framework_name = '%s_framework' % (fwSettings.backend.lower())
+#     __import__('backends', globals(), fromlist=[framework_name], level=1)
+#     framework_module = getattr(backends, framework_name)
+#     Framework = getattr(framework_module, '%sFramework' % fwSettings.backend.capitalize())
+# except Exception as ex:
+#     print('Unable to import the back-end %s: %s' % (fwSettings.backend, ex))
+#     print('Attempting to fall back on the pyglet back-end.')
+#
+#     from Box2D.examples.backends.pyglet_framework import PygletFramework as Framework

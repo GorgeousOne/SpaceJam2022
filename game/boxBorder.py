@@ -1,5 +1,7 @@
 import numpy as np
-from Box2D import b2World, b2Draw, b2Color, b2Vec2
+from Box2D import b2World, b2Color, b2Vec2
+
+from gui.backends.pyglet_framework import PygletDraw
 
 
 class BoxBorder:
@@ -30,14 +32,5 @@ class BoxBorder:
 			(0 - thickness, 0 - thickness),
 		]
 
-	def display(self, renderer: b2Draw):
-		# from custom pyglet framework
-		renderer.DrawSolidTriangleStrip(self.displayVertices, self.fill)
-
-		unit = 10
-		steps = int(np.ceil(self.size / unit))
-		for x in range(1, steps):
-			renderer.DrawSegment(b2Vec2(x * unit, 0), b2Vec2(x * unit, self.size), b2Color(0.1, 0.1, 0.15))
-
-		for y in range(1, steps):
-			renderer.DrawSegment(b2Vec2(0, y * unit), b2Vec2(self.size, y * unit), b2Color(0.1, 0.1, 0.15))
+	def display(self, renderer: PygletDraw, layer_index: int):
+		renderer.DrawSolidTriangleStrip(layer_index, self.displayVertices, self.fill)
