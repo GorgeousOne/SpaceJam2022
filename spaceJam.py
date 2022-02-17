@@ -1,6 +1,5 @@
 from typing import Tuple
 
-import glooey
 import numpy as np
 from Box2D import b2Color, b2Vec2
 
@@ -15,40 +14,6 @@ from gui.pygletFramework import PygletFramework
 from logic.pilot.afkPilot import AfkPilot
 from logic.pilot.circlePilot import CirclePilot
 from logic.spaceshipPilot import SpaceshipPilot
-
-
-class MyLabel(glooey.Label):
-	custom_color = '#babdb6'
-	custom_font_size = 10
-	custom_alignment = 'center'
-
-
-class MyTitle(glooey.Label):
-	custom_color = '#eeeeec'
-	custom_font_size = 12
-	custom_alignment = 'center'
-	custom_bold = True
-
-
-class MyButton(glooey.Button):
-	Foreground = MyLabel
-	custom_alignment = 'fill'
-
-	class Base(glooey.Background):
-		custom_color = '#204a87'
-
-	class Over(glooey.Background):
-		custom_color = '#3465a4'
-
-	class Down(glooey.Background):
-		custom_color = '#729fcff'
-
-	def __init__(self, text, response):
-		super().__init__(text)
-		self.response = response
-
-	def on_click(self, widget):
-		print(self.response)
 
 
 class SpaceJam(PygletFramework):
@@ -73,19 +38,6 @@ class SpaceJam(PygletFramework):
 		self.spawn_ship(AfkPilot(self.gameSize), (40, 50))
 		self.spawn_ship(CirclePilot(self.gameSize), (75, 50), b2Color(0.26, 0.53, 0.96))
 
-		# gui = glooey.Gui(self.window)
-		# vbox = glooey.VBox()
-		# vbox.alignment = 'center'
-		# title = MyTitle("What...is your favorite color?")
-		# vbox.add(title)
-		# buttons = [
-		# 	MyButton("Blue.", "Right, off you go."),
-		# 	MyButton("Blue. No yel--", "Auuuuuuuugh!"),
-		# 	MyButton("I don't know that!", "Auuuuuuuugh!"),
-		# ]
-		# for button in buttons:
-		# 	vbox.add(button)
-		# gui.add(vbox)
 
 	def Redraw(self):
 		self.frameCount += 1
