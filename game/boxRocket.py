@@ -3,7 +3,7 @@ import numpy as np
 from Box2D import b2World, b2FixtureDef, b2CircleShape, b2Vec2, b2Color
 
 from game.boxSpaceship import BoxSpaceship
-from gui.backends.pyglet_framework import PygletDraw
+from gui.pygletDraw import PygletDraw
 
 
 class BoxRocket:
@@ -47,6 +47,9 @@ class BoxRocket:
 		]
 
 	def display(self, renderer: PygletDraw, layer_index: int):
+		# makes shadow look funny when grabbing and redirecting a rocket xD
+		self.body.angle = np.arctan2(self.body.linearVelocity.y, self.body.linearVelocity.x)
+
 		transparent = b2Color(self.color)
 		transparent.a = 0
 		renderer.DrawGradientRect(layer_index, self._get_shadow_verts_translated(), self.shadowColor, transparent)

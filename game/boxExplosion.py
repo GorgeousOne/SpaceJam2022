@@ -1,10 +1,9 @@
 import datetime
 import math
-from typing import Tuple
 
 from Box2D import b2Color, b2Vec2
 
-from gui.backends.pyglet_framework import PygletDraw
+from gui.pygletDraw import PygletDraw
 
 
 class BoxExplosion:

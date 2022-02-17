@@ -1,9 +1,9 @@
 import math
 import random
 
-from Box2D import b2Draw, b2Color, b2Vec2
+from Box2D import b2Color, b2Vec2
 
-from gui.backends.pyglet_framework import PygletDraw
+from gui.pygletDraw import PygletDraw
 
 STAR_SHAPE = [
 	b2Vec2(-1, 0),

@@ -1,7 +1,6 @@
-import numpy as np
-from Box2D import b2World, b2Color, b2Vec2
+from Box2D import b2World, b2Color
 
-from gui.backends.pyglet_framework import PygletDraw
+from gui.pygletDraw import PygletDraw
 
 
 class BoxBorder:
