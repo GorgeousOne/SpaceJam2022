@@ -1,23 +1,17 @@
 import numpy as np
+import math
 
 def wrap_to_pi(rad_angle):
-	return (rad_angle + np.pi) % (2 * np.pi) - np.pi
+	return (rad_angle + math.pi) % (2 * math.pi) - math.pi
 
 class Location:
 
-	def __init__(self, position: np.ndarray = np.zeros(2), rotation: float = 0, velocity: np.ndarray = np.zeros(2)):
+	def __init__(self, position: np.ndarray = np.zeros(2), velocity: np.ndarray = np.zeros(2)):
 		self._position = position.copy()
-		# self._rotation = wrap_to_pi(rotation)
 		self._velocity = velocity.copy()
 
 	def get_position(self) -> np.ndarray:
 		return self._position
-
-	# def get_rotation(self) -> float:
-	# 	return self._rotation
-
-	# def get_direction(self) -> np.ndarray:
-	# 	return np.array([np.cos(self._rotation), np.sin(self._rotation)])
 
 	def get_velocity(self) -> np.ndarray:
 		return self._velocity

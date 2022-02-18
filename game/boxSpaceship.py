@@ -1,3 +1,4 @@
+import math
 from typing import Tuple, List
 
 import numpy as np
@@ -63,22 +64,17 @@ viewbox = [b2Vec2(v[0], v[1]) for v in viewbox]
 
 class BoxSpaceship:
 
-	def __init__(self, world: b2World, pilot: SpaceshipPilot, health: int, pos: Tuple[float, float] = (0, 0), color: b2Color = b2Color(1., 1., 1.)):
+	def __init__(self, world: b2World, pilot: SpaceshipPilot, health: int, color: b2Color = b2Color(1., 1., 1.), pos: b2Vec2 = b2Vec2(0, 0), angle: float = 0):
 		self.pilot = pilot
 		self.health = health
 		self.energy = 0
 
 		self.color = b2Color(color)
 		self.shape = b2PolygonShape(vertices=hitbox)
-		# self.shape = b2PolygonShape(vertices=[
-		# 	(2.618, 0),
-		# 	(0, -1),
-		# 	(-1, 0),
-		# 	(0, 1),
-		# ])
 		self.body = world.CreateDynamicBody(
 			userData=self,  # adds a reference on the body to the spaceship object
-			position=pos,
+			position=b2Vec2(pos),
+			angle=angle,
 			linearDamping=0,
 			shapes=[self.shape],
 			shapeFixture=b2FixtureDef(
@@ -95,10 +91,9 @@ class BoxSpaceship:
 		return self.pilot.process_scan(current_action, located_rockets)
 
 	def move(self, impulse: b2Vec2):
-		# self.body.angle = np.arctan2(impulse.y, impulse.x)
 		self.body.linearVelocity += impulse
 		if self.body.linearVelocity.y != 0 or self.body.linearVelocity.x != 0:
-			self.body.angle = np.arctan2(self.body.linearVelocity.y, self.body.linearVelocity.x)
+			self.body.angle = math.atan2(self.body.linearVelocity.y, self.body.linearVelocity.x)
 
 	def damage(self, amount: int):
 		self.health -= amount
@@ -108,10 +103,10 @@ class BoxSpaceship:
 	def get_location(self):
 		pos = self.body.position
 		vel = self.body.linearVelocity
-		return Location(np.array([pos.x, pos.y]), self.body.angle, np.array([vel.x, vel.y]))
+		return Location(np.array([pos.x, pos.y]), np.array([vel.x, vel.y]))
 
 	def display(self, renderer: PygletDraw, layer_index: int):
-		# self.body.angle = np.arctan2(self.body.linearVelocity.y, self.body.linearVelocity.x)
+		# self.body.angle = math.atan2(self.body.linearVelocity.y, self.body.linearVelocity.x)
 		vertices = []
 
 		# for v in self.shape.vertices:

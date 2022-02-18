@@ -1,3 +1,4 @@
+import math
 from typing import List
 
 import numpy as np
@@ -9,9 +10,9 @@ from logic.spaceshipPilot import SpaceshipPilot
 
 class CirclePilot(SpaceshipPilot):
 
-	def __init__(self, level_width=0, spaceship_size=0):
-		super().__init__(level_width, spaceship_size)
-		self.center = np.array([self.level_width / 2, self.level_width / 2])
+	def __init__(self, game_width=0, spaceship_size=0):
+		super().__init__(game_width, spaceship_size)
+		self.center = np.array([self.gameWidth / 2, self.gameWidth / 2])
 		self.updateCount = 0
 		self.speed = 5
 		self.radius = 30
@@ -36,8 +37,8 @@ class CirclePilot(SpaceshipPilot):
 
 		if self.updateCount % 5 == 0:
 			center_dir = vec_angle(self.center - pos)
-			action.shoot_rocket(center_dir - np.pi/2)
-			action.scan_area(50, center_dir, np.pi / 8)
+			action.shoot_rocket(center_dir - math.pi/2)
+			action.scan_area(50, center_dir, math.pi / 8)
 		return action
 
 	def process_scan(self, current_action: PilotAction, located_rockets: List[Location]) -> PilotAction:
@@ -45,7 +46,7 @@ class CirclePilot(SpaceshipPilot):
 
 
 def vec_angle(vec: np.ndarray):
-	return np.arctan2(vec[1], vec[0])
+	return math.atan2(vec[1], vec[0])
 
 def norm_vec(vec: np.ndarray):
 	"""
@@ -57,4 +58,4 @@ def norm_vec(vec: np.ndarray):
 def angle_between(v1: np.ndarray, v2: np.ndarray):
 	v1_u = norm_vec(v1)
 	v2_u = norm_vec(v2)
-	return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+	return math.acos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))

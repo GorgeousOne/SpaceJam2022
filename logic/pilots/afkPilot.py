@@ -7,8 +7,8 @@ from logic.spaceshipPilot import SpaceshipPilot
 
 class AfkPilot(SpaceshipPilot):
 
-	def __init__(self, level_width = 0, spaceship_size = 0):
-		super().__init__(level_width, spaceship_size)
+	def __init__(self, game_width = 0, spaceship_size = 0):
+		super().__init__(game_width, spaceship_size)
 
 	def update(self, current_location: Location, current_health: float, current_energy: float) -> PilotAction:
 		pass

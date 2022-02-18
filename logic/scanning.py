@@ -1,3 +1,4 @@
+import math
 from typing import List
 
 import numpy as np
@@ -7,7 +8,7 @@ from logic.location import Location
 EPSILON = 0.0001
 
 def wrap_to_pi(rad_angle):
-	return (rad_angle + np.pi) % (2 * np.pi) - np.pi
+	return (rad_angle + math.pi) % (2 * math.pi) - math.pi
 
 def calculate_scan_energy_cost(direction: float, radius: float) -> float:
 	return radius * direction
@@ -22,6 +23,6 @@ def is_loc_in_scan(loc: Location, scan_center: Location, radius: float, directio
 
 	if np.linalg.norm(dist_vec) > radius:
 		return False
-	angle_towards_loc = np.arctan2(dist_vec[1], dist_vec[0])
+	angle_towards_loc = math.atan2(dist_vec[1], dist_vec[0])
 	rel_angle = wrap_to_pi(angle_towards_loc - direction)
 	return abs(rel_angle) - angle / 2 <= EPSILON

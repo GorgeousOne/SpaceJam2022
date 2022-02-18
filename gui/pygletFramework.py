@@ -91,7 +91,7 @@ class Keys(object):
 	pass
 
 
-class PygletFramework():
+class PygletFramework:
 
 	def setup_keys(self):
 		key = pyglet.window.key
@@ -251,14 +251,10 @@ class PygletFramework():
 		self.window.push_handlers(self.keys)
 
 		# Create a new batch for drawing
-		# self.renderer.batch = pyglet.graphics.Batch()
 		self.renderer.clear_layers()
 
 		# Reset the text position
 		self.textLine = 15
-
-		# Draw the title of the test at the top
-		# self.Print(self.name)
 
 		# Step the physics
 		self.Step(self.settings)

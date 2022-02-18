@@ -1,4 +1,5 @@
 import math
+import random
 from typing import List
 
 from Box2D import b2Vec2, b2World, b2Color
@@ -10,21 +11,32 @@ from game.boxSpaceship import BoxSpaceship
 from logic import scanning
 from logic.location import Location
 from logic.pilotAction import PilotAction
+from logic.spaceshipPilot import SpaceshipPilot
 
 
 class GameHandler:
 
-	def __init__(self, world: b2World, contact_listener: BoxContactListener):
+	def __init__(self, world: b2World, contact_handler: BoxContactListener, game_size: int):
 		self.world = world
-		self.contact_listener = contact_listener
-		self.rocket_speed = 10
-		self.tick_energy = 100
+		self.contactHandler = contact_handler
+		self.rocketSpeed = 10
+		self.tickEnergy = 100
 		self.colorScanSuccess = b2Color(1, .2, .2)
+		self.gameSize = game_size
+		self.spawnRange = self.gameSize * 0.4
+
+	def spawn_spaceship(self, pilot: SpaceshipPilot, color: b2Color = b2Color(1, 0.73, 0)):
+		angle = random.uniform(-math.pi, math.pi)
+		distance = self.spawnRange * math.acos(random.uniform(0, 1)) / math.pi
+		pos = b2Vec2(
+			self.gameSize/2 + math.cos(angle) * distance,
+			self.gameSize/2 + math.sin(angle) * distance)
+		self.contactHandler.add_spaceship(BoxSpaceship(self.world, pilot, 60, color, pos, random.uniform(-math.pi, math.pi)))
 
 	def update(self):
-		for spaceship in self.contact_listener.spaceships:
+		for spaceship in self.contactHandler.spaceships:
 			# try:
-			action = spaceship.update(self.tick_energy)
+			action = spaceship.update(self.tickEnergy)
 			self.handle_pilot_action(spaceship, action)
 			# except Exception as e:
 			# 	print(str(e.__traceback__))
@@ -53,18 +65,18 @@ class GameHandler:
 			scan.get("radius"),
 			scan.get("direction"),
 			scan.get("angle"),
-			[other.get_location() for other in self.contact_listener.spaceships if other != spaceship])
+			[other.get_location() for other in self.contactHandler.spaceships if other != spaceship])
 
 		# print(self.spaceships, [other.get_location() for other in self.spaceships if other != spaceship], located_rockets)
 		if located_rockets:
-			self.contact_listener.add_scan(BoxScan(
+			self.contactHandler.add_scan(BoxScan(
 				spaceship.get_location().get_position(),
 				scan.get("radius"),
 				scan.get("direction"),
 				scan.get("angle"),
 				self.colorScanSuccess))
 		else:
-			self.contact_listener.add_scan(BoxScan(
+			self.contactHandler.add_scan(BoxScan(
 				spaceship.get_location().get_position(),
 				scan.get("radius"),
 				scan.get("direction"),
@@ -92,7 +104,7 @@ class GameHandler:
 
 	def handle_pilot_shoot(self, spaceship: BoxSpaceship, shoot: dict):
 		direction = angle2vec(shoot.get("angle")) * 30
-		self.contact_listener.add_rocket(BoxRocket(self.world, spaceship, direction))
+		self.contactHandler.add_rocket(BoxRocket(self.world, spaceship, direction))
 
 
 def angle2vec(angle: float) -> b2Vec2:

@@ -235,6 +235,9 @@ class PygletDraw(b2Draw):
                 center[1] + math.sin(current_angle) * radius))
         return self.triangle_fan(fan)
 
+    def c4f_arr(self, color: b2Color):
+        return [color.r, color.g, color.b, getattr(color, "a", 1.0)]
+
     def DrawCircle(self, layer_index, center, radius, color):
         """
         Draw an unfilled circle given center, radius and color.
@@ -248,7 +251,7 @@ class PygletDraw(b2Draw):
                        ('v2f', ll_vertices),
                        ('c4f', [color.r, color.g, color.b, 1.0] * ll_count))
 
-    def DrawSolidCircle(self, layer_index, center, radius, axis, color):
+    def DrawSolidCircle(self, layer_index, center, radius, color):
         """
         Draw an filled circle given center, radius, axis (of orientation) and color.
         """
@@ -259,7 +262,7 @@ class PygletDraw(b2Draw):
 
         batch.add(tf_count, gl.GL_TRIANGLES, self.blended,
                        ('v2f', tf_vertices),
-                       ('c4f', [color.r, color.g, color.b, 1.0] * tf_count))
+                       ('c4f', self.c4f_arr(color) * tf_count))
 
     def DrawPolygon(self, layer_index, vertices, color):
         """
@@ -313,9 +316,6 @@ class PygletDraw(b2Draw):
             ('v2f', vertex_arr),
             ('c4f', self.c4f_arr(color) * count)
         )
-
-    def c4f_arr(self, color: b2Color):
-        return [color.r, color.g, color.b, getattr(color, "a", 1.0)]
 
     def DrawGradientRect(self, layer_index, vertices, color1, color2):
         """
