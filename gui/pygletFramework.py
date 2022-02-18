@@ -226,7 +226,8 @@ class PygletFramework():
 		"""
 		Main loop.
 		"""
-		if self.settings.hz > 0.0: pyglet.clock.schedule_interval(self.SimulationLoop, 1.0 / self.settings.hz)
+		if self.settings.hz > 0.0:
+			pyglet.clock.schedule_interval(self.SimulationLoop, 1.0 / self.settings.hz)
 
 		# self.window.push_handlers(pyglet.window.event.WindowEventLogger())
 		# TODO: figure out why this is required
@@ -261,7 +262,6 @@ class PygletFramework():
 
 		# Step the physics
 		self.Step(self.settings)
-		self.renderer.StartDraw()
 		self.window.invalid = True
 
 		self.fps = pyglet.clock.get_fps()
@@ -288,9 +288,9 @@ class PygletFramework():
 		self.world.Step(timeStep, settings.velocityIterations, settings.positionIterations)
 		self.world.ClearForces()
 
-		# if renderer is not None:
-		#     renderer.StartDraw()
 		self.Redraw()
+		self.renderer.StartDraw()
+
 
 	def Redraw(self):
 		raise NotImplementedError()

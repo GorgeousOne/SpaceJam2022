@@ -1,5 +1,6 @@
 Box2D
-pyglet
+# Feb 2022: there are currently issues with pyglet 1.5.21 on graphic chips
+pyglet==1.4.10
 numpy
 box2d-kengz
 tripy
