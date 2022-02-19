@@ -204,7 +204,6 @@ class PygletFramework:
 		Recalculates the necessary projection.
 		"""
 		gl.glViewport(0, 0, self.window.width, self.window.height)
-
 		gl.glMatrixMode(gl.GL_PROJECTION)
 		gl.glLoadIdentity()
 

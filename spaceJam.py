@@ -70,7 +70,6 @@ class SpaceJam(PygletFramework):
 	def Keyboard(self, key):
 		if key == 32:
 			for ship in self.contactHandler.spaceships:
-				# heading = ship.get_location().get_direction() * 30
 				heading = b2Vec2(math.cos(ship.body.angle), math.sin(ship.body.angle)) * 30
 				rocket = BoxRocket(self.world, ship, heading)
 				self.contactHandler.add_rocket(rocket)
