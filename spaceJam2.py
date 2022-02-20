@@ -14,12 +14,13 @@ class SpaceJam2:
 		self.window = pyglet.window.Window(config=pyglet.gl.Config(sample_buffers=1, samples=8))
 		self.windowSize = 600
 		self.window.set_size(self.windowSize, self.windowSize)
+
 		self.window.set_caption("Space Jam")
 		self.gameSize = 100
 
 		self.background = BoxBackground(self.gameSize, fwSettings.hz)
 		self.renderer = PygletDraw(self.window)
-		menu = GameMenu(self.window, self.renderer, self.gameSize, self.background)
+		menu = GameMenu(self.window, self.windowSize, self.renderer, self.gameSize, self.background)
 
 		menu.run()
 		pyglet.app.run()

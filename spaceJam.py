@@ -1,7 +1,7 @@
 import math
 
 import pyglet
-from Box2D import b2Vec2, b2Color
+from Box2D import b2Vec2
 
 from game.boxBackground import BoxBackground
 from game.boxBorder import BoxBorder
@@ -10,8 +10,6 @@ from game.boxRocket import BoxRocket
 from game.gameHandler import GameHandler
 from game.pilotHandler import PilotHandler
 from gui.pygletFramework import PygletFramework
-from logic.pilots.afkPilot import AfkPilot
-from logic.pilots.circlePilot import CirclePilot
 
 
 class SpaceJam(PygletFramework):

@@ -42,7 +42,7 @@ class BoxBackground:
 
 		# draw grid:
 		steps = 10
-		unit = int(math.ceil(self.size / steps))
+		unit = 1.0 * self.size / steps
 		# steps = int(math.ceil(self.size / unit))
 		for x in range(1, steps):
 			renderer.DrawSegment(layer_index, b2Vec2(x * unit, 0), b2Vec2(x * unit, self.size), b2Color(0.1, 0.1, 0.15))
