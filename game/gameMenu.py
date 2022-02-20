@@ -26,18 +26,17 @@ class MenuLabel(glooey.Label):
 
 class List(glooey.VBox):
 	custom_cell_padding = 10
-	custom_default_cell_size = 10
+	custom_default_cell_size = 1
+	custom_alignment = "top"
 
-
-class ListTitle(glooey.Label):
+class Title(glooey.Label):
 	custom_font_name = "GravityBold8"
-	custom_color = '#eeeeec'
 	custom_font_size = 12
+	custom_color = '#eeeeec'
 	custom_alignment = 'center'
-	custom_bold = True
 
 
-class ListButton(glooey.Button):
+class CustomButton(glooey.Button):
 	Foreground = MenuLabel
 	custom_alignment = 'fill'
 
@@ -49,6 +48,9 @@ class ListButton(glooey.Button):
 
 	class Down(glooey.Background):
 		custom_color = '#5773FF'
+
+	class Off(glooey.Background):
+		custom_color = "#696969"
 
 	def __init__(self, text: str, callback):
 		super().__init__(text)
@@ -96,22 +98,25 @@ class GameMenu:
 
 	def setup_gui(self):
 		self.gui = MenuGui(self.window, self.background)
-		self.root = glooey.VBox()
-		self.root.top_padding = 100
-		self.root.alignment = "top"
+		root = glooey.VBox()
+		root.set_default_cell_size(1)
+		root.set_cell_padding(40)
+		root.set_top_padding(40)
+		root.set_alignment("top")
 
-		self.pilotTable = glooey.HBox()
-		self.pilotTable.cell_padding = 80
-		self.root.add(self.pilotTable)
+		gameTitle = Title("Space Jam", font_size=24)
+		root.add(gameTitle)
+
+		tableContainer = glooey.HBox()
+		tableContainer.set_cell_padding(80)
+		root.add(tableContainer)
 
 		self.availablePilotsBox = List()
 		self.selectedPilotsBox = List()
-
-		self.availablePilotsBox.add(ListTitle("Available"))
-		self.selectedPilotsBox.add(ListTitle("Selected"))
-
-		self.pilotTable.add(self.availablePilotsBox)
-		self.pilotTable.add(self.selectedPilotsBox)
+		self.availablePilotsBox.add(Title("Available"))
+		self.selectedPilotsBox.add(Title("Selected"))
+		tableContainer.add(self.availablePilotsBox)
+		tableContainer.add(self.selectedPilotsBox)
 
 		buttons = [
 			"Afk Bot",
@@ -122,11 +127,20 @@ class GameMenu:
 		for i in range(len(buttons)):
 			self._add_available_pilot(buttons[i])
 
-		self.gui.add(self.root)
+		self.readyButton = CustomButton("Ready", self._start_game)
+		self.readyButton.set_alignment("center")
+		self.readyButton.disable()
+		self.readyButton.get_foreground().set_horz_padding(40)
+		root.add(self.readyButton)
+
+		self.gui.add(root)
 
 	def run(self):
 		self.background.set_size(self.windowSize)
 		pyglet.clock.schedule_interval(self.display, 1.0 / 30)
+		pass
+
+	def _start_game(self, button=None):
 		pass
 
 	def cancel(self):
@@ -139,20 +153,31 @@ class GameMenu:
 		self.gui.display()
 		self.frameCount += 1
 
+		if self.frameCount == 30:
+			self.window.width = 600
+			self.window.height = 600
+
 	def _add_available_pilot(self, name: str):
-		self.availablePilotsBox.add(ListButton(name, self._select_pilot))
+		self.availablePilotsBox.add(CustomButton(name, self._select_pilot))
 		self.availablePilotsCount += 1
 
-	def _select_pilot(self, button: ListButton):
-		if self.selectedPilotsCount >= 10:
+	def _select_pilot(self, button: CustomButton):
+		if self.selectedPilotsCount >= 8:
 			return
+
 		text = button.get_foreground().get_text()
-		self.selectedPilotsBox.add(ListButton(text, self._deselect_pilot))
+		self.selectedPilotsBox.add(CustomButton(text, self._deselect_pilot))
 		self.selectedPilotsCount += 1
 
-	def _deselect_pilot(self, button: ListButton):
+		if self.selectedPilotsCount > 1:
+			self.readyButton.enable()
+
+	def _deselect_pilot(self, button: CustomButton):
 		self.selectedPilotsBox.remove(button)
 		self.selectedPilotsCount -= 1
+
+		if self.selectedPilotsCount < 2:
+			self.readyButton.disable()
 
 	def find_pilot_scripts(self, path):
 		pass
