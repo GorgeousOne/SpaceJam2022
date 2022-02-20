@@ -76,9 +76,8 @@ class PygletDraw(b2Draw):
     circle_cache_tf = {}  # triangle fan (inside)
     circle_cache_ll = {}  # line loop (border)
 
-    def __init__(self, test):
+    def __init__(self):
         super(PygletDraw, self).__init__()
-        self.test = test
         self.layers = {}
 
     def clear_layers(self):
