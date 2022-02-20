@@ -1,5 +1,6 @@
 import math
 
+import pyglet
 from Box2D import b2Vec2, b2Color
 
 from game.boxBackground import BoxBackground
@@ -33,8 +34,6 @@ class SpaceJam(PygletFramework):
 		self.pilotHandler = PilotHandler(self.gameHandler, self.gameSize, 5)
 
 		self._create_game_field()
-		# self.gameHandler.spawn_spaceship(AfkPilot(self.gameSize))
-		# self.gameHandler.spawn_spaceship(CirclePilot(self.gameSize), b2Color(0.26, 0.53, 0.96))
 		self.pilotHandler.add_cmd_line_pilots()
 
 	def Redraw(self):
@@ -63,9 +62,8 @@ class SpaceJam(PygletFramework):
 		self.border = BoxBorder(self.world, self.gameSize, 1)
 		self.background = BoxBackground(self.gameSize)
 
-		self.setZoom((self.gameSize + 4) / 50)
-		self.viewCenter.x = self.gameSize / 2
-		self.viewCenter.y = self.gameSize / 2
+		self.renderer.setZoom((self.gameSize + 4) / 50)
+		self.renderer.setCenter(b2Vec2(self.gameSize / 2, self.gameSize / 2))
 
 	def Keyboard(self, key):
 		if key == 32:
@@ -77,3 +75,4 @@ class SpaceJam(PygletFramework):
 
 if __name__ == "__main__":
 	SpaceJam().run()
+	pyglet.app.run()

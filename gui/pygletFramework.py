@@ -40,7 +40,6 @@ import string
 
 import pyglet
 from Box2D import (b2Vec2, b2World, b2AABB, b2QueryCallback, b2_dynamicBody, b2DestructionListener, b2Joint, b2Fixture)
-from pyglet import gl
 
 from gui.pygletDraw import grText, PygletDraw
 from gui.pygletWindow import PygletWindow
@@ -130,9 +129,6 @@ class PygletFramework:
 		self.renderer = None
 
 		# Screen/rendering-related
-		self._viewZoom = 10.0
-		self._viewCenter = None
-		self._viewOffset = None
 		self.screenSize = None
 		self.rMouseDown = False
 		self.textLine = 30
@@ -146,8 +142,6 @@ class PygletFramework:
 		self.textGroup = None
 
 		# Screen-related
-		self._viewZoom = 1.0
-		self._viewCenter = None
 		self.screenSize = None
 		self.textLine = 30
 		self.font = None
@@ -164,7 +158,7 @@ class PygletFramework:
 		self.world.destructionListener = self.destructionListener
 
 		print('Initializing Pyglet framework...')
-		self.window = PygletWindow(self)
+		self.window = pyglet.window.Window(config=pyglet.gl.Config(sample_buffers=1, samples=8))
 
 		# Initialize the text display group
 		self.textGroup = grText(self.window)
@@ -173,68 +167,37 @@ class PygletFramework:
 		self.font = pyglet.font.load(self.fontname, self.fontsize)
 		self.screenSize = b2Vec2(self.window.width, self.window.height)
 
-		self.renderer = PygletDraw(self)
+		self.renderer = PygletDraw(self.window)
 		self.renderer.surface = self.window.screen
 		# Aaron: everything will be rendered manually
 
-		self.world.renderer = self.renderer
+		# self.world.renderer = self.renderer
 		self._viewCenter = b2Vec2(0, 0)
 		self.groundbody = self.world.CreateBody()
 
-	def setCenter(self, value):
-		"""
-		Updates the view offset based on the center of the screen.
-
-		Tells the debug draw to update its values also.
-		"""
-		self._viewCenter = b2Vec2(*value)
-		self.updateProjection()
-
-	def setZoom(self, zoom):
-		self._viewZoom = zoom
-		self.updateProjection()
-
-	viewZoom = property(lambda self: self._viewZoom, setZoom,
-	                    doc='Zoom factor for the display')
-	viewCenter = property(lambda self: self._viewCenter, setCenter,
-	                      doc='Screen center in camera coordinates')
-
-	def updateProjection(self):
-		"""
-		Recalculates the necessary projection.
-		"""
-		gl.glViewport(0, 0, self.window.width, self.window.height)
-		gl.glMatrixMode(gl.GL_PROJECTION)
-		gl.glLoadIdentity()
-
-		ratio = float(self.window.width) / self.window.height
-
-		extents = b2Vec2(ratio * 25.0, 25.0)
-		extents *= self._viewZoom
-
-		lower = self._viewCenter - extents
-		upper = self._viewCenter + extents
-
-		# L/R/B/T
-		gl.gluOrtho2D(lower.x, upper.x, lower.y, upper.y)
-
-		gl.glMatrixMode(gl.GL_MODELVIEW)
-		gl.glLoadIdentity()
 
 	def run(self):
 		"""
 		Main loop.
 		"""
+		self.window.push_handlers(self)
+		self.window.push_handlers(self.renderer)
+
 		if self.settings.hz > 0.0:
 			pyglet.clock.schedule_interval(self.SimulationLoop, 1.0 / self.settings.hz)
 
 		# self.window.push_handlers(pyglet.window.event.WindowEventLogger())
 		# TODO: figure out why this is required
 		self.window._enable_event_queue = False
-		pyglet.app.run()
+
+	def cancel(self):
+		pyglet.clock.unschedule(self.SimulationLoop)
+
 		self.world.contactListener = None
 		self.world.destructionListener = None
 		self.world.renderer = None
+		self.window.remove_handlers(self)
+		self.window.remove_handlers(self.renderer)
 
 	def SimulationLoop(self, dt):
 		"""
@@ -252,14 +215,9 @@ class PygletFramework:
 		# Create a new batch for drawing
 		self.renderer.clear_layers()
 
-		# Reset the text position
-		self.textLine = 15
-
 		# Step the physics
 		self.Step(self.settings)
 		self.window.invalid = True
-
-		self.fps = pyglet.clock.get_fps()
 
 	def Step(self, settings):
 		"""
@@ -290,6 +248,56 @@ class PygletFramework:
 	def Redraw(self):
 		raise NotImplementedError()
 
+
+	def on_close(self):
+		"""
+		Callback: user tried to close the window
+		"""
+		self.cancel()
+
+	def on_key_press(self, key, modifiers):
+		self._Keyboard_Event(key, down=True)
+
+	def on_key_release(self, key, modifiers):
+		self._Keyboard_Event(key, down=False)
+
+	def on_mouse_press(self, x, y, button, modifiers):
+		p = self.ConvertScreenToWorld(x, y)
+		self.mouseWorld = p
+		if button == pyglet.window.mouse.LEFT:
+			if modifiers & pyglet.window.key.MOD_SHIFT:
+				self.ShiftMouseDown(p)
+			else:
+				self.MouseDown(p)
+		elif button == pyglet.window.mouse.MIDDLE:
+			pass
+
+	def on_mouse_release(self, x, y, button, modifiers):
+		"""
+		Mouse up
+		"""
+		p = self.ConvertScreenToWorld(x, y)
+		self.mouseWorld = p
+
+		if button == pyglet.window.mouse.LEFT:
+			self.MouseUp(p)
+
+	def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
+		"""
+		Mouse scrollwheel used
+		"""
+		pass
+
+	def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
+		"""
+		Mouse moved while clicking
+		"""
+		p = self.ConvertScreenToWorld(x, y)
+		self.mouseWorld = p
+		self.MouseMove(p)
+
+
+	
 	def _Keyboard_Event(self, key, down=True):
 		"""
 		Internal keyboard event, don't override this.
@@ -305,18 +313,6 @@ class PygletFramework:
 				self.Keyboard(key)
 		else:
 			self.KeyboardUp(key)
-
-	def Keyboard(self, key):
-		"""
-		Callback indicating 'key' has been pressed down.
-		"""
-		pass
-
-	def KeyboardUp(self, key):
-		"""
-		Callback indicating 'key' has been released.
-		"""
-		pass
 
 	def CheckKeys(self):
 		"""
@@ -384,15 +380,14 @@ class PygletFramework:
 
 		ratio = float(self.window.width) / self.window.height
 		extents = b2Vec2(ratio * 25.0, 25.0)
-		extents *= self._viewZoom
+		extents *= self.renderer.viewZoom
 
-		lower = self._viewCenter - extents
-		upper = self._viewCenter + extents
+		lower = self.renderer.viewCenter - extents
+		upper = self.renderer.viewCenter + extents
 
 		p = b2Vec2(
 			(1.0 - u) * lower.x + u * upper.x,
 			(1.0 - v) * lower.y + v * upper.y)
-
 		return p
 
 	def DrawStringAt(self, x, y, str, color=(229, 153, 153, 255)):
@@ -401,7 +396,7 @@ class PygletFramework:
 		"""
 		pyglet.text.Label(str, font_name=self.fontname,
 		                  font_size=self.fontsize, x=x, y=self.window.height - y,
-		                  color=color, batch=self.renderer.batch, group=self.textGroup)
+		                  color=color, batch=self.renderer.get_or_create_layer(0), group=self.textGroup)
 
 	def Print(self, str, color=(229, 153, 153, 255)):
 		"""
@@ -409,7 +404,7 @@ class PygletFramework:
 		"""
 		pyglet.text.Label(str, font_name=self.fontname,
 		                  font_size=self.fontsize, x=5, y=self.window.height -
-		                                                  self.textLine, color=color, batch=self.renderer.batch,
+		                                                  self.textLine, color=color, batch=self.renderer.get_or_create_layer(0),
 		                  group=self.textGroup)
 		self.textLine += 15
 

@@ -47,7 +47,6 @@ class MenuGui(glooey.Gui):
 	def __init__(self, window: pyglet.window.Window, background: BoxBackground):
 		super().__init__(window, clear_before_draw=False)
 		self.background = background
-		# self.window.remove_handlers(self)
 
 	def display(self):
 		super().on_draw()
@@ -61,16 +60,17 @@ class MenuGui(glooey.Gui):
 
 class GameMenu:
 
-	def __init__(self, window: PygletWindow, renderer: PygletDraw, background: BoxBackground):
+	def __init__(self, window: PygletWindow, renderer: PygletDraw, game_size: int, background: BoxBackground):
 		self.window = window
 		self.renderer = renderer
+		self.gameSize = game_size
+
 		self.background = background
 		self.setup_gui()
 		self.frameCount = 0
 
 	def setup_gui(self):
 		self.gui = MenuGui(self.window, self.background)
-
 		self.root = glooey.VBox()
 		self.root.alignment = 'center'
 
@@ -91,8 +91,12 @@ class GameMenu:
 		self.gui.add(self.root)
 
 	def run(self):
+		self.background.set_size(self.window.width)
 		pyglet.clock.schedule_interval(self.display, 1.0 / 30)
 		pass
+
+	def cancel(self):
+		pyglet.clock.unschedule(self.display)
 
 	def display(self, dt):
 		self.window.clear()

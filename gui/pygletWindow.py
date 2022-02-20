@@ -17,19 +17,6 @@ class PygletWindow(pyglet.window.Window):
 		super(PygletWindow, self).on_close()
 
 
-	def on_show(self):
-		"""
-		Callback: the window was shown.
-		"""
-		# updates projection on next draw
-		self._isFirstDraw = True
-
-	# adds projection update on first draw, doesn't work earlier somehow
-	def on_draw(self):
-		if self.framework and self._isFirstDraw:
-			self.framework.updateProjection()
-			self._isFirstDraw = False
-
 	def on_key_press(self, key, modifiers):
 		if self.framework:
 			self.framework._Keyboard_Event(key, down=True)

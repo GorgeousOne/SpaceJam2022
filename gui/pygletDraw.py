@@ -1,7 +1,7 @@
 import math
 
 import pyglet
-from Box2D import b2Draw, b2Color
+from Box2D import b2Draw, b2Color, b2Vec2
 from pyglet import gl
 
 
@@ -76,9 +76,62 @@ class PygletDraw(b2Draw):
     circle_cache_tf = {}  # triangle fan (inside)
     circle_cache_ll = {}  # line loop (border)
 
-    def __init__(self):
+    def __init__(self, window: pyglet.window.Window):
         super(PygletDraw, self).__init__()
+        self.window = window
         self.layers = {}
+
+        self._viewZoom = 10.0
+        self._viewCenter = b2Vec2(300, 300)
+        self._viewOffset = b2Vec2(0, 0)
+
+        self._isFirstDraw = False
+
+    def setCenter(self, value):
+        """
+		Updates the view offset based on the center of the screen.
+
+		Tells the debug draw to update its values also.
+		"""
+        self._viewCenter = b2Vec2(*value)
+        self.updateProjection()
+
+    def setZoom(self, zoom):
+        self._viewZoom = zoom
+        self.updateProjection()
+
+    viewZoom = property(lambda self: self._viewZoom, setZoom,
+                        doc='Zoom factor for the display')
+    viewCenter = property(lambda self: self._viewCenter, setCenter,
+                          doc='Screen center in camera coordinates')
+
+    def updateProjection(self):
+        """
+		Recalculates the necessary projection.
+		"""
+        gl.glViewport(0, 0, self.window.width, self.window.height)
+        gl.glMatrixMode(gl.GL_PROJECTION)
+        gl.glLoadIdentity()
+
+        ratio = float(self.window.width) / self.window.height
+
+        extents = b2Vec2(ratio * 25.0, 25.0)
+        extents *= self._viewZoom
+
+        lower = self._viewCenter - extents
+        upper = self._viewCenter + extents
+
+        # L/R/B/T
+        gl.gluOrtho2D(lower.x, upper.x, lower.y, upper.y)
+
+        gl.glMatrixMode(gl.GL_MODELVIEW)
+        gl.glLoadIdentity()
+
+    def on_show(self):
+        """
+		Callback: the window was shown.
+		"""
+        self._isFirstDraw = True
 
     def clear_layers(self):
         self.layers.clear()
@@ -89,6 +142,10 @@ class PygletDraw(b2Draw):
         return self.layers[layer_index]
 
     def StartDraw(self):
+        if self._isFirstDraw:
+            self.updateProjection()
+            self._isFirstDraw = False
+
         for index in sorted(list(self.layers.keys()), reverse=True):
             self.layers[index].draw()
 
