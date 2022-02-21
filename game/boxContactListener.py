@@ -17,6 +17,14 @@ class BoxContactListener(b2ContactListener):
 		self.scans = set()
 		self._bodies_to_remove = set()
 
+	def reset(self):
+		self._bodies_to_remove.update([ship.body for ship in self.spaceships])
+		self._bodies_to_remove.update([rocket.body for rocket in self.rockets])
+		self.spaceships.clear()
+		self.rockets.clear()
+		self.explosions.clear()
+		self.scans.clear()
+
 	def add_rocket(self, rocket: BoxRocket):
 		self.rockets.add(rocket)
 

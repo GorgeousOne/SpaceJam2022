@@ -2,7 +2,7 @@ import pyglet
 
 from game.boxBackground import BoxBackground
 from game.gameMenu import GameMenu
-from gameSimulation import GameSimulation
+from game.gameSimulation import GameSimulation
 from gui.settings import fwSettings
 
 from pyglet import gl
@@ -39,7 +39,9 @@ class SpaceJam:
 
 	def _start_game(self):
 		self.menu.cancel()
+		self.simulation.reload()
 		self.simulation.set_frame_count(self.menu.frameCount)
+		self.simulation.add_pilots(self.menu.get_selected_pilot_classes())
 		self.simulation.run()
 		pass
 

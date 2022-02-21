@@ -1,5 +1,5 @@
 import os
-import sys
+import pkgutil
 
 import glooey
 import pyglet
@@ -7,17 +7,13 @@ from pyglet import gl
 from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
 
+import pilots.afkPilot
+import pilots.circlePilot
+
 from game.boxBackground import BoxBackground
 from gui.pygletDraw import PygletDraw
 from gui.pygletWindow import PygletWindow
-
-
-def resource_path(relative_path):
-	try:
-		base_path = sys._MEIPASS
-	except Exception:
-		base_path = os.path.abspath(".")
-	return os.path.join(base_path, relative_path)
+from util import fileLoad
 
 
 class MenuLabel(glooey.Label):
@@ -47,6 +43,8 @@ class ListBox(glooey.ScrollBox):
 	def remove_elem(self, elem: glooey.Widget):
 		self.table.remove(elem)
 
+	def get_elems(self):
+		return self.table.get_children()
 
 class Title(glooey.Label):
 	custom_font_name = "GravityBold8"
@@ -95,18 +93,11 @@ class MenuGui(glooey.Gui):
 		pass
 
 
-class WesnothLoremIpsum(glooey.LoremIpsum):
-	custom_font_name = 'Lato Regular'
-	custom_font_size = 10
-	custom_color = '#b9ad86'
-	custom_alignment = 'fill horz'
-
-
 class GameMenu:
 
 	def __init__(self, window: PygletWindow, game_matrixf, background: BoxBackground, game_start_callback):
 		# https://jotson.itch.io/gravity-pixel-font
-		font_path = resource_path(os.path.sep.join(["res", "GravityBold8.ttf"]))
+		font_path = fileLoad.resource_path(os.path.sep.join(["res", "GravityBold8.ttf"]))
 		pyglet.font.add_file(font_path)
 
 		self.window = window
@@ -118,8 +109,18 @@ class GameMenu:
 		self.frameCount = 0
 		self.availablePilotsCount = 0
 		self.selectedPilotsCount = 0
+
+		self.pilotClasses = {}
 		self._setup_gui()
 		self._setup_watchdog()
+
+	def get_selected_pilot_classes(self):
+		selected_pilots = []
+		for elem in self.selectedPilotsBox.get_elems():
+			if isinstance(elem, CustomButton):
+				selected_pilots.append(self.pilotClasses[elem.get_foreground().get_text()])
+		return selected_pilots
+
 
 	def _setup_gui(self):
 		self.gui = MenuGui(self.window)
@@ -133,7 +134,7 @@ class GameMenu:
 		root.add(gameTitle)
 
 		tableContainer = glooey.HBox()
-		tableContainer.set_cell_padding(80)
+		tableContainer.set_cell_padding(40)
 		root.add(tableContainer)
 
 		self.availablePilotsBox = ListBox()
@@ -143,15 +144,8 @@ class GameMenu:
 		tableContainer.add(self.availablePilotsBox)
 		tableContainer.add(self.selectedPilotsBox)
 
-		buttons = [
-			"Afk Bot",
-			"Circle Bot",
-			"User Script",
-		]
-		# self.availablePilotsBox.add_elem(WesnothLoremIpsum())
-
-		for i in range(len(buttons)):
-			self._add_available_pilot(buttons[i])
+		self._load_default_pilots()
+		self._load_user_pilots()
 
 		self.readyButton = CustomButton("Not Ready", lambda widget: self.gameStartCallback())
 		self.readyButton.set_size_hint(200, 0)
@@ -199,11 +193,9 @@ class GameMenu:
 		self.gui.display()
 		self.frameCount += 1
 
-		if self.frameCount == 30:
-			self.window.width = 600
-			self.window.height = 600
-
-	def _add_available_pilot(self, name: str):
+	def _add_available_pilot(self, pilot_class):
+		name = pilot_class.__name__
+		self.pilotClasses[name] = pilot_class
 		self.availablePilotsBox.add_elem(CustomButton(name, self._select_pilot))
 		self.availablePilotsCount += 1
 
@@ -226,11 +218,30 @@ class GameMenu:
 			self.readyButton.get_foreground().set_text("Not Ready")
 			self.readyButton.disable()
 
-	def load_default_pilots(self):
-		pass
+	def _load_default_pilots(self):
+		self._add_available_pilot(pilots.afkPilot.AfkPilot)
+		self._add_available_pilot(pilots.circlePilot.CirclePilot)
+		# can't get it to work with pyinstaller
+		# pkg_path = fileLoad.resource_path(pilots.__name__)
+		# for importer, modname, ispkg in pkgutil.iter_modules([pkg_path]):
+		# 	pilot_class_path = pilots.__name__ + os.path.sep + modname + ".py"
+		# 	self._add_available_pilot(fileLoad.load_class_by_module_name(pilot_class_path))
 
-	def _add_pilot(self, path):
-		pass
+	def _load_user_pilots(self):
+		pkg_path = os.path.abspath(".")
+		for importer, modname, ispkg in pkgutil.iter_modules([pkg_path]):
+			if ispkg:
+				continue
+			try:
+				pilot_class = fileLoad.load_class_by_module_name(modname + ".py")
+			except ValueError as e:
+				print(str(e))
+				continue
+
+			if hasattr(pilot_class, "update") and hasattr(pilot_class, "process_scan"):
+				self._add_available_pilot(pilot_class)
+			else:
+				print("Class", pilot_class.__name__, "is missing update() function or process_scan() function.")
 
 	# watchdog functions
 	def on_created(self, event):

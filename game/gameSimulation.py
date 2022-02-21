@@ -1,4 +1,5 @@
 import math
+from typing import List
 
 import pyglet
 from Box2D import b2Vec2
@@ -9,7 +10,6 @@ from game.boxBorder import BoxBorder
 from game.boxContactListener import BoxContactListener
 from game.boxRocket import BoxRocket
 from game.gameHandler import GameHandler
-from game.pilotHandler import PilotHandler
 from gui.pygletFramework import PygletFramework
 
 
@@ -29,13 +29,22 @@ class GameSimulation(PygletFramework):
 
 		self.gameHandler = GameHandler(self.world, self.contactHandler, self.gameSize)
 		# spaceship svg model currently has size 5
-		self.pilotHandler = PilotHandler(self.gameHandler, self.gameSize, 5)
+		self.spaceshipSize = 5
+		# self.pilotHandler = PilotHandler(self.gameHandler, self.gameSize, 5)
 
 		self._create_game_field()
-		self.pilotHandler.add_cmd_line_pilots()
+		# self.pilotHandler.add_cmd_line_pilots()
 
 	def set_frame_count(self, frame_count: int):
 		self.frameCount = frame_count
+
+	def reload(self):
+		self.gameHandler.reset()
+		self.contactHandler.reset()
+
+	def add_pilots(self, pilot_classes: List):
+		for pilot in pilot_classes:
+			self.gameHandler.spawn_spaceship(pilot(self.gameSize, self.spaceshipSize))
 
 	def Redraw(self):
 		gl.glPushMatrix()

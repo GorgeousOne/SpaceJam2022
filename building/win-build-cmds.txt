@@ -1,1 +1,1 @@
-pyinstaller.exe --onefile ../spacejam2.py --add-binary="../res/GravityBold8.ttf;res"
+pyinstaller.exe --onefile ../spaceJam.py --add-binary="../res/GravityBold8.ttf;res"
