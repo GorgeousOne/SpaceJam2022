@@ -4,6 +4,8 @@ import sys
 import glooey
 import pyglet
 from pyglet import gl
+from watchdog.events import PatternMatchingEventHandler
+from watchdog.observers import Observer
 
 from game.boxBackground import BoxBackground
 from gui.pygletDraw import PygletDraw
@@ -25,10 +27,26 @@ class MenuLabel(glooey.Label):
 	custom_padding = 10
 
 
-class List(glooey.VBox):
-	custom_cell_padding = 10
-	custom_default_cell_size = 1
-	custom_alignment = "top"
+class ListBox(glooey.ScrollBox):
+	custom_alignment = 'center'
+	custom_height_hint = 360
+
+	class VBar(glooey.VScrollBar):
+		custom_scale_grip = True
+
+	def __init__(self):
+		super().__init__()
+		self.table = glooey.VBox()
+		self.table.set_cell_padding(10)
+		self.table.set_default_cell_size(1)
+		self.add(self.table)
+
+	def add_elem(self, elem: glooey.Widget):
+		self.table.add(elem)
+
+	def remove_elem(self, elem: glooey.Widget):
+		self.table.remove(elem)
+
 
 class Title(glooey.Label):
 	custom_font_name = "GravityBold8"
@@ -77,6 +95,13 @@ class MenuGui(glooey.Gui):
 		pass
 
 
+class WesnothLoremIpsum(glooey.LoremIpsum):
+	custom_font_name = 'Lato Regular'
+	custom_font_size = 10
+	custom_color = '#b9ad86'
+	custom_alignment = 'fill horz'
+
+
 class GameMenu:
 
 	def __init__(self, window: PygletWindow, game_matrixf, background: BoxBackground, game_start_callback):
@@ -93,9 +118,10 @@ class GameMenu:
 		self.frameCount = 0
 		self.availablePilotsCount = 0
 		self.selectedPilotsCount = 0
-		self.setup_gui()
+		self._setup_gui()
+		self._setup_watchdog()
 
-	def setup_gui(self):
+	def _setup_gui(self):
 		self.gui = MenuGui(self.window)
 		root = glooey.VBox()
 		root.set_default_cell_size(1)
@@ -110,10 +136,10 @@ class GameMenu:
 		tableContainer.set_cell_padding(80)
 		root.add(tableContainer)
 
-		self.availablePilotsBox = List()
-		self.selectedPilotsBox = List()
-		self.availablePilotsBox.add(Title("Available"))
-		self.selectedPilotsBox.add(Title("Selected"))
+		self.availablePilotsBox = ListBox()
+		self.selectedPilotsBox = ListBox()
+		self.availablePilotsBox.add_elem(Title("Available"))
+		self.selectedPilotsBox.add_elem(Title("Selected"))
 		tableContainer.add(self.availablePilotsBox)
 		tableContainer.add(self.selectedPilotsBox)
 
@@ -122,23 +148,44 @@ class GameMenu:
 			"Circle Bot",
 			"User Script",
 		]
+		# self.availablePilotsBox.add_elem(WesnothLoremIpsum())
 
 		for i in range(len(buttons)):
 			self._add_available_pilot(buttons[i])
 
-		self.readyButton = CustomButton("Ready!", lambda widget: self.gameStartCallback())
+		self.readyButton = CustomButton("Not Ready", lambda widget: self.gameStartCallback())
+		self.readyButton.set_size_hint(200, 0)
 		self.readyButton.set_alignment("center")
+		self.readyButton.get_foreground().set_alignment("center")
+
 		self.readyButton.disable()
-		self.readyButton.get_foreground().set_horz_padding(40)
 		root.add(self.readyButton)
 
 		self.gui.add(root)
+
+	def _setup_watchdog(self):
+		patterns = ["*.py"]
+		ignore_patterns = None
+		ignore_directories = True
+		case_sensitive = True
+		my_event_handler = PatternMatchingEventHandler(patterns, ignore_patterns, ignore_directories, case_sensitive)
+		my_event_handler.on_created = self.on_created
+		my_event_handler.on_deleted = self.on_deleted
+		my_event_handler.on_modified = self.on_modified
+		my_event_handler.on_moved = self.on_moved
+
+		path = "."
+		self.my_observer = Observer()
+		self.my_observer.schedule(my_event_handler, path, recursive=False)
+		self.my_observer.start()
 
 	def run(self):
 		pyglet.clock.schedule_interval(self.display, 1.0 / 30)
 
 	def cancel(self):
 		pyglet.clock.unschedule(self.display)
+		self.my_observer.stop()
+		self.my_observer.join()
 
 	def display(self, dt):
 		self.window.clear()
@@ -157,26 +204,43 @@ class GameMenu:
 			self.window.height = 600
 
 	def _add_available_pilot(self, name: str):
-		self.availablePilotsBox.add(CustomButton(name, self._select_pilot))
+		self.availablePilotsBox.add_elem(CustomButton(name, self._select_pilot))
 		self.availablePilotsCount += 1
 
 	def _select_pilot(self, button: CustomButton):
 		if self.selectedPilotsCount >= 8:
 			return
-
 		text = button.get_foreground().get_text()
-		self.selectedPilotsBox.add(CustomButton(text, self._deselect_pilot))
+		self.selectedPilotsBox.add_elem(CustomButton(text, self._deselect_pilot))
 		self.selectedPilotsCount += 1
 
 		if self.selectedPilotsCount > 1:
+			self.readyButton.get_foreground().set_text("Ready!")
 			self.readyButton.enable()
 
 	def _deselect_pilot(self, button: CustomButton):
-		self.selectedPilotsBox.remove(button)
+		self.selectedPilotsBox.remove_elem(button)
 		self.selectedPilotsCount -= 1
 
 		if self.selectedPilotsCount < 2:
+			self.readyButton.get_foreground().set_text("Not Ready")
 			self.readyButton.disable()
 
-	def find_pilot_scripts(self, path):
+	def load_default_pilots(self):
 		pass
+
+	def _add_pilot(self, path):
+		pass
+
+	# watchdog functions
+	def on_created(self, event):
+		print(f"hey, {event.src_path} has been created!")
+
+	def on_deleted(self, event):
+		print(f"Someone deleted {event.src_path}!")
+
+	def on_modified(self, event):
+		print(f"{event.src_path} has been modified")
+
+	def on_moved(self, event):
+		print(f"someone moved {event.src_path} to {event.dest_path}")

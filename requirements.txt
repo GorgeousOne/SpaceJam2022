@@ -5,3 +5,4 @@ box2d-kengz
 numpy
 tripy
 glooey
+watchdog
