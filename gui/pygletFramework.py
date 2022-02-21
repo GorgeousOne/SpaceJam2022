@@ -153,9 +153,6 @@ class PygletFramework:
 		self.world = b2World(gravity=(0, 0), doSleep=True)
 		self.destructionListener = fwDestructionListener(test=self)
 		self.world.destructionListener = self.destructionListener
-
-		print('Initializing Pyglet framework...')
-		# self.window = pyglet.window.Window(config=pyglet.gl.Config(sample_buffers=1, samples=8))
 		self.window = window
 
 		# Initialize the text display group

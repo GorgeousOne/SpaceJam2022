@@ -22,35 +22,43 @@ class MenuLabel(glooey.Label):
 	custom_font_size = 12
 	custom_padding = 10
 
-
-class ListBox(glooey.ScrollBox):
-	custom_alignment = 'center'
-	custom_height_hint = 360
-
-	class VBar(glooey.VScrollBar):
-		custom_scale_grip = True
-
-	def __init__(self):
-		super().__init__()
-		self.table = glooey.VBox()
-		self.table.set_cell_padding(10)
-		self.table.set_default_cell_size(1)
-		self.add(self.table)
-
-	def add_elem(self, elem: glooey.Widget):
-		self.table.add(elem)
-
-	def remove_elem(self, elem: glooey.Widget):
-		self.table.remove(elem)
-
-	def get_elems(self):
-		return self.table.get_children()
-
 class Title(glooey.Label):
 	custom_font_name = "GravityBold8"
 	custom_font_size = 12
 	custom_color = '#eeeeec'
 	custom_alignment = 'center'
+
+class VScrollBox(glooey.ScrollBox):
+	class VBar(glooey.VScrollBar):
+		pass
+
+class ScrollList(glooey.VBox):
+	custom_alignment = 'top'
+	custom_default_cell_size = 1
+	custom_cell_padding = 15
+
+	def __init__(self, name):
+		super().__init__()
+		self.header = Title(name)
+		self.table = VScrollBox()
+
+		self.table.set_height_hint(360)
+		self.tableContents = glooey.VBox()
+		self.tableContents.set_cell_padding(10)
+		self.tableContents.set_default_cell_size(1)
+
+		self.add(self.header)
+		self.add(self.table)
+		self.table.add(self.tableContents)
+
+	def add_elem(self, elem: glooey.Widget):
+		self.tableContents.add(elem)
+
+	def remove_elem(self, elem: glooey.Widget):
+		self.tableContents.remove(elem)
+
+	def get_elems(self):
+		return self.tableContents.get_children()
 
 
 class CustomButton(glooey.Button):
@@ -126,21 +134,20 @@ class GameMenu:
 		self.gui = MenuGui(self.window)
 		root = glooey.VBox()
 		root.set_default_cell_size(1)
-		root.set_cell_padding(40)
-		root.set_top_padding(40)
+		root.set_cell_padding(20)
+		root.set_top_padding(20)
 		root.set_alignment("top")
 
 		gameTitle = Title("Space Jam", font_size=24)
+		gameTitle.set_padding(20)
 		root.add(gameTitle)
 
 		tableContainer = glooey.HBox()
 		tableContainer.set_cell_padding(40)
 		root.add(tableContainer)
 
-		self.availablePilotsBox = ListBox()
-		self.selectedPilotsBox = ListBox()
-		self.availablePilotsBox.add_elem(Title("Available"))
-		self.selectedPilotsBox.add_elem(Title("Selected"))
+		self.availablePilotsBox = ScrollList("Available")
+		self.selectedPilotsBox = ScrollList("Selected")
 		tableContainer.add(self.availablePilotsBox)
 		tableContainer.add(self.selectedPilotsBox)
 

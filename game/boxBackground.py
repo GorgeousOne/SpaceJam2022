@@ -44,8 +44,8 @@ class BoxBackground:
 		steps = 10
 		unit = 1.0 * self.size / steps
 		# steps = int(math.ceil(self.size / unit))
-		for x in range(1, steps):
-			renderer.DrawSegment(layer_index, b2Vec2(x * unit, 0), b2Vec2(x * unit, self.size), b2Color(0.1, 0.1, 0.15))
+		for x in range(0, steps + 1):
+			renderer.DrawSegment(layer_index, b2Vec2(x * unit, -unit), b2Vec2(x * unit, self.size + unit), b2Color(0.1, 0.1, 0.15))
 
-		for y in range(1, steps):
-			renderer.DrawSegment(layer_index, b2Vec2(0, y * unit), b2Vec2(self.size, y * unit), b2Color(0.1, 0.1, 0.15))
+		for y in range(0, steps + 1):
+			renderer.DrawSegment(layer_index, b2Vec2(-unit, y * unit), b2Vec2(self.size + unit, y * unit), b2Color(0.1, 0.1, 0.15))
