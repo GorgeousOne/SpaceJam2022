@@ -3,6 +3,7 @@ import sys
 
 import glooey
 import pyglet
+from pyglet import gl
 
 from game.boxBackground import BoxBackground
 from gui.pygletDraw import PygletDraw
@@ -63,9 +64,8 @@ class CustomButton(glooey.Button):
 
 class MenuGui(glooey.Gui):
 
-	def __init__(self, window: pyglet.window.Window, background: BoxBackground):
+	def __init__(self, window: pyglet.window.Window):
 		super().__init__(window, clear_before_draw=False)
-		self.background = background
 
 	def display(self):
 		super().on_draw()
@@ -79,25 +79,24 @@ class MenuGui(glooey.Gui):
 
 class GameMenu:
 
-	def __init__(self, window: PygletWindow, window_size: int, renderer: PygletDraw, game_size: int, background: BoxBackground):
+	def __init__(self, window: PygletWindow, game_matrixf, background: BoxBackground, game_start_callback):
 		# https://jotson.itch.io/gravity-pixel-font
 		font_path = resource_path(os.path.sep.join(["res", "GravityBold8.ttf"]))
 		pyglet.font.add_file(font_path)
 
 		self.window = window
-		self.windowSize = window_size
-		self.renderer = renderer
-		self.gameSize = game_size
-
+		self.gameMatrixF = game_matrixf
 		self.background = background
-		self.frameCount = 0
+		self.gameStartCallback = game_start_callback
 
+		self.renderer = PygletDraw(self.window)
+		self.frameCount = 0
 		self.availablePilotsCount = 0
 		self.selectedPilotsCount = 0
 		self.setup_gui()
 
 	def setup_gui(self):
-		self.gui = MenuGui(self.window, self.background)
+		self.gui = MenuGui(self.window)
 		root = glooey.VBox()
 		root.set_default_cell_size(1)
 		root.set_cell_padding(40)
@@ -127,7 +126,7 @@ class GameMenu:
 		for i in range(len(buttons)):
 			self._add_available_pilot(buttons[i])
 
-		self.readyButton = CustomButton("Ready", self._start_game)
+		self.readyButton = CustomButton("Ready!", lambda widget: self.gameStartCallback())
 		self.readyButton.set_alignment("center")
 		self.readyButton.disable()
 		self.readyButton.get_foreground().set_horz_padding(40)
@@ -136,20 +135,20 @@ class GameMenu:
 		self.gui.add(root)
 
 	def run(self):
-		self.background.set_size(self.windowSize)
 		pyglet.clock.schedule_interval(self.display, 1.0 / 30)
-		pass
-
-	def _start_game(self, button=None):
-		pass
 
 	def cancel(self):
 		pyglet.clock.unschedule(self.display)
 
 	def display(self, dt):
 		self.window.clear()
+
+		gl.glPushMatrix()
+		gl.glLoadMatrixf(self.gameMatrixF)
 		self.background.display(self.renderer, 0, self.frameCount)
 		self.renderer.StartDraw()
+		pyglet.gl.glPopMatrix()
+
 		self.gui.display()
 		self.frameCount += 1
 

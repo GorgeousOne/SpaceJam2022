@@ -2,6 +2,7 @@ import math
 
 import pyglet
 from Box2D import b2Vec2
+from pyglet import gl
 
 from game.boxBackground import BoxBackground
 from game.boxBorder import BoxBorder
@@ -12,15 +13,14 @@ from game.pilotHandler import PilotHandler
 from gui.pygletFramework import PygletFramework
 
 
-class SpaceJam(PygletFramework):
+class GameSimulation(PygletFramework):
 	name = "Space Jam"
 
-	def __init__(self):
-		super(SpaceJam, self).__init__()
+	def __init__(self, window: pyglet.window.Window, game_matrixf, background: BoxBackground):
+		super(GameSimulation, self).__init__(window)
 
-		self.windowSize = 600
-		self.window.set_size(self.windowSize, self.windowSize)
-		self.window.set_caption("Space Jam")
+		self.gameMatrixF = game_matrixf
+		self.background = background
 		self.gameSize = 100
 		self.frameCount = 0
 
@@ -34,8 +34,12 @@ class SpaceJam(PygletFramework):
 		self._create_game_field()
 		self.pilotHandler.add_cmd_line_pilots()
 
+	def set_frame_count(self, frame_count: int):
+		self.frameCount = frame_count
+
 	def Redraw(self):
-		self.frameCount += 1
+		gl.glPushMatrix()
+		gl.glLoadMatrixf(self.gameMatrixF)
 
 		if self.frameCount % (self.settings.hz // 5) == 0:
 			self.gameHandler.update()
@@ -54,13 +58,17 @@ class SpaceJam(PygletFramework):
 
 		self.border.display(self.renderer, 0)
 		self.background.display(self.renderer, 2, self.frameCount)
+		self.renderer.StartDraw()
+		gl.glPopMatrix()
+
+		self.frameCount += 1
 
 	def _create_game_field(self):
 		self.world.gravity = (0.0, 0.0)
 		self.border = BoxBorder(self.world, self.gameSize, 1)
-		self.background = BoxBackground(self.gameSize)
 
-		self.renderer.setZoom((self.gameSize + 4) / 50)
+		# sets scale of renderer. this has no effect on rendering, only on mouse coordinate calculation
+		self.renderer.setZoom((self.gameSize + self.border.thickness) / 50)
 		self.renderer.setCenter(b2Vec2(self.gameSize / 2, self.gameSize / 2))
 
 	def Keyboard(self, key):
@@ -69,8 +77,3 @@ class SpaceJam(PygletFramework):
 				heading = b2Vec2(math.cos(ship.body.angle), math.sin(ship.body.angle)) * 30
 				rocket = BoxRocket(self.world, ship, heading)
 				self.contactHandler.add_rocket(rocket)
-
-
-if __name__ == "__main__":
-	SpaceJam().run()
-	pyglet.app.run()

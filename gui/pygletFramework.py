@@ -42,7 +42,6 @@ import pyglet
 from Box2D import (b2Vec2, b2World, b2AABB, b2QueryCallback, b2_dynamicBody, b2DestructionListener, b2Joint, b2Fixture)
 
 from gui.pygletDraw import grText, PygletDraw
-from gui.pygletWindow import PygletWindow
 from gui.settings import fwSettings
 
 
@@ -149,16 +148,15 @@ class PygletFramework:
 
 		self.setup_keys()
 
-	def __init__(self):
-		# super(PygletFramework, self).__init__()
-
+	def __init__(self, window: pyglet.window.Window):
 		self.__reset()
 		self.world = b2World(gravity=(0, 0), doSleep=True)
 		self.destructionListener = fwDestructionListener(test=self)
 		self.world.destructionListener = self.destructionListener
 
 		print('Initializing Pyglet framework...')
-		self.window = pyglet.window.Window(config=pyglet.gl.Config(sample_buffers=1, samples=8))
+		# self.window = pyglet.window.Window(config=pyglet.gl.Config(sample_buffers=1, samples=8))
+		self.window = window
 
 		# Initialize the text display group
 		self.textGroup = grText(self.window)
@@ -181,7 +179,7 @@ class PygletFramework:
 		Main loop.
 		"""
 		self.window.push_handlers(self)
-		self.window.push_handlers(self.renderer)
+		# self.window.push_handlers(self.renderer)
 
 		if self.settings.hz > 0.0:
 			pyglet.clock.schedule_interval(self.SimulationLoop, 1.0 / self.settings.hz)
@@ -242,7 +240,6 @@ class PygletFramework:
 		self.world.ClearForces()
 
 		self.Redraw()
-		self.renderer.StartDraw()
 
 
 	def Redraw(self):
