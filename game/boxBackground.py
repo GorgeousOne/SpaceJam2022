@@ -3,7 +3,7 @@ import random
 
 from Box2D import b2Color, b2Vec2
 
-from gui.pygletDraw import PygletDraw
+from render.pygletDraw import PygletDraw
 
 STAR_SHAPE = [
 	b2Vec2(-1, 0),

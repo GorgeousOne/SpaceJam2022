@@ -41,8 +41,8 @@ import string
 import pyglet
 from Box2D import (b2Vec2, b2World, b2AABB, b2QueryCallback, b2_dynamicBody, b2DestructionListener, b2Joint, b2Fixture)
 
-from gui.pygletDraw import grText, PygletDraw
-from gui.settings import fwSettings
+from render.pygletDraw import grText, PygletDraw
+from render.settings import fwSettings
 
 
 class fwDestructionListener(b2DestructionListener):
@@ -187,10 +187,9 @@ class PygletFramework:
 
 	def cancel(self):
 		pyglet.clock.unschedule(self.SimulationLoop)
-
-		self.world.contactListener = None
-		self.world.destructionListener = None
-		self.world.renderer = None
+		# self.world.contactListener = None
+		# self.world.destructionListener = None
+		# self.world.renderer = None
 		self.window.remove_handlers(self)
 		self.window.remove_handlers(self.renderer)
 
@@ -373,7 +372,7 @@ class PygletFramework:
 		v = float(y) / self.window.height
 
 		ratio = float(self.window.width) / self.window.height
-		extents = b2Vec2(ratio * 25.0, 25.0)
+		extents = b2Vec2(ratio, 1.0)
 		extents *= self.renderer.viewZoom
 
 		lower = self.renderer.viewCenter - extents

@@ -3,7 +3,7 @@ import math
 
 from Box2D import b2Color, b2Vec2
 
-from gui.pygletDraw import PygletDraw
+from render.pygletDraw import PygletDraw
 
 
 class BoxScan:

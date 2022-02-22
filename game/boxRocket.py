@@ -3,7 +3,7 @@ import math
 from Box2D import b2World, b2FixtureDef, b2CircleShape, b2Vec2, b2Color
 
 from game.boxSpaceship import BoxSpaceship
-from gui.pygletDraw import PygletDraw
+from render.pygletDraw import PygletDraw
 
 
 class BoxRocket:

@@ -85,7 +85,7 @@ class PygletDraw(b2Draw):
         self._viewCenter = b2Vec2(300, 300)
         self._viewOffset = b2Vec2(0, 0)
 
-        self._isFirstDraw = False
+        # self._isFirstDraw = False
 
     def setCenter(self, value):
         """
@@ -94,11 +94,11 @@ class PygletDraw(b2Draw):
 		Tells the debug draw to update its values also.
 		"""
         self._viewCenter = b2Vec2(*value)
-        self.updateProjection()
+        # self.updateProjection()
 
     def setZoom(self, zoom):
         self._viewZoom = zoom
-        self.updateProjection()
+        # self.updateProjection()
 
     viewZoom = property(lambda self: self._viewZoom, setZoom,
                         doc='Zoom factor for the display')
@@ -109,13 +109,14 @@ class PygletDraw(b2Draw):
         """
 		Recalculates the necessary projection.
 		"""
+        raise ValueError("Function should not be called if model view matrix is handled manually")
         gl.glViewport(0, 0, self.window.width, self.window.height)
         gl.glMatrixMode(gl.GL_PROJECTION)
         gl.glLoadIdentity()
 
         ratio = float(self.window.width) / self.window.height
 
-        extents = b2Vec2(ratio * 25.0, 25.0)
+        extents = b2Vec2(ratio, 1.0)
         extents *= self._viewZoom
 
         lower = self._viewCenter - extents
@@ -131,7 +132,8 @@ class PygletDraw(b2Draw):
         """
 		Callback: the window was shown.
 		"""
-        self._isFirstDraw = True
+        pass
+        # self._isFirstDraw = True
 
     def clear_layers(self):
         self.layers.clear()
@@ -142,10 +144,9 @@ class PygletDraw(b2Draw):
         return self.layers[layer_index]
 
     def StartDraw(self):
-        if self._isFirstDraw:
-            self.updateProjection()
-            self._isFirstDraw = False
-
+        # if self._isFirstDraw:
+        #     self.updateProjection()
+        #     self._isFirstDraw = False
         for index in sorted(list(self.layers.keys()), reverse=True):
             self.layers[index].draw()
 

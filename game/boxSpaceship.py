@@ -4,7 +4,7 @@ from typing import Tuple, List
 import numpy as np
 from Box2D import (b2World, b2PolygonShape, b2FixtureDef, b2Color, b2Vec2)
 
-from gui.pygletDraw import PygletDraw
+from render.pygletDraw import PygletDraw
 from logic.location import Location
 from logic.pilotAction import PilotAction
 from logic.spaceshipPilot import SpaceshipPilot

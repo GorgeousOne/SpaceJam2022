@@ -1,6 +1,6 @@
 from Box2D import b2World, b2Color
 
-from gui.pygletDraw import PygletDraw
+from render.pygletDraw import PygletDraw
 
 
 class BoxBorder:

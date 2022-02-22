@@ -3,19 +3,21 @@ import pyglet
 from game.boxBackground import BoxBackground
 from game.gameMenu import GameMenu
 from game.gameSimulation import GameSimulation
-from gui.settings import fwSettings
+from render.settings import fwSettings
 
 from pyglet import gl
 
 class SpaceJam:
 
 	def get_game_projection(self):
-		border_thickness = 2
-		scale = self.windowSize / (self.gameSize + 2 * border_thickness)
+		border_thickness = 1
+		scale = self.windowSize / (self.gameSize + 4 * border_thickness)
 
 		gl.glPushMatrix()
+		gl.glLoadIdentity()
+		gl.glMatrixMode(gl.GL_MODELVIEW)
 		gl.glScalef(scale, scale, 1)
-		gl.glTranslatef(border_thickness, border_thickness, 0)
+		gl.glTranslatef(2 * border_thickness, 2 * border_thickness, 0)
 
 		matrix = (gl.GLfloat * 16)()
 		gl.glGetFloatv(pyglet.gl.GL_MODELVIEW_MATRIX, matrix)
@@ -29,21 +31,28 @@ class SpaceJam:
 		self.gameSize = 100
 
 		self.background = BoxBackground(self.gameSize, fwSettings.hz)
-		projection_matrix = self.get_game_projection()
-		self.menu = GameMenu(self.window, projection_matrix, self.background, self._start_game)
-		self.simulation = GameSimulation(self.window, projection_matrix, self.background)
+		self.menu = None
+		self.simulation = None
+		gl.glLoadMatrixf(self.get_game_projection())
 
-		self.menu.run()
+		self._start_menu()
 		pyglet.app.run()
-		pass
+
+	def _start_menu(self):
+		self.menu = GameMenu(self.window, self.background, self._start_game)
+		if self.simulation:
+			self.simulation.cancel()
+			self.menu.set_frame_count(self.simulation.frameCount)
+			self.simulation = None
+		self.menu.run(fwSettings.hz)
 
 	def _start_game(self):
-		self.menu.cancel()
-		self.simulation.reload()
-		self.simulation.set_frame_count(self.menu.frameCount)
-		self.simulation.add_pilots(self.menu.get_selected_pilot_classes())
+		self.simulation = GameSimulation(self.window, self.background, self.menu.get_selected_pilot_classes(), self._start_menu)
+		if self.menu:
+			self.menu.cancel()
+			self.simulation.set_frame_count(self.menu.frameCount)
+			self.menu = None
 		self.simulation.run()
-		pass
 
 if __name__ == '__main__':
 	SpaceJam()

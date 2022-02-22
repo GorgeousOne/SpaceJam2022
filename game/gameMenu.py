@@ -11,8 +11,8 @@ import pilots.afkPilot
 import pilots.circlePilot
 
 from game.boxBackground import BoxBackground
-from gui.pygletDraw import PygletDraw
-from gui.pygletWindow import PygletWindow
+from render.pygletDraw import PygletDraw
+from render.pygletWindow import PygletWindow
 from util import fileLoad
 
 
@@ -77,7 +77,7 @@ class CustomButton(glooey.Button):
 	class Off(glooey.Background):
 		custom_color = "#696969"
 
-	def __init__(self, text: str, callback):
+	def __init__(self, text: str, callback = None):
 		super().__init__(text)
 		self.callback = callback
 
@@ -103,13 +103,13 @@ class MenuGui(glooey.Gui):
 
 class GameMenu:
 
-	def __init__(self, window: PygletWindow, game_matrixf, background: BoxBackground, game_start_callback):
+	def __init__(self, window: PygletWindow, background: BoxBackground, game_start_callback):
 		# https://jotson.itch.io/gravity-pixel-font
 		font_path = fileLoad.resource_path(os.path.sep.join(["res", "GravityBold8.ttf"]))
 		pyglet.font.add_file(font_path)
 
 		self.window = window
-		self.gameMatrixF = game_matrixf
+		# self.gameMatrixF = game_matrixf
 		self.background = background
 		self.gameStartCallback = game_start_callback
 
@@ -120,7 +120,7 @@ class GameMenu:
 
 		self.pilotClasses = {}
 		self._setup_gui()
-		self._setup_watchdog()
+		# self._setup_watchdog()
 
 	def get_selected_pilot_classes(self):
 		selected_pilots = []
@@ -180,24 +180,27 @@ class GameMenu:
 		self.my_observer.schedule(my_event_handler, path, recursive=False)
 		self.my_observer.start()
 
-	def run(self):
-		pyglet.clock.schedule_interval(self.display, 1.0 / 30)
+	def set_frame_count(self, frame_count: int):
+		self.frameCount = frame_count
+
+	def run(self, fps):
+		pyglet.clock.schedule_interval(self.display, 1.0 / fps)
 
 	def cancel(self):
 		pyglet.clock.unschedule(self.display)
-		self.my_observer.stop()
-		self.my_observer.join()
+		self.window.remove_handlers(self.gui)
+		# self.my_observer.stop()
+		# self.my_observer.join()
 
 	def display(self, dt):
 		self.window.clear()
-
-		gl.glPushMatrix()
-		gl.glLoadMatrixf(self.gameMatrixF)
 		self.background.display(self.renderer, 0, self.frameCount)
 		self.renderer.StartDraw()
-		pyglet.gl.glPopMatrix()
 
+		gl.glPushMatrix()
+		gl.glLoadIdentity()
 		self.gui.display()
+		gl.glPopMatrix()
 		self.frameCount += 1
 
 	def _add_available_pilot(self, pilot_class):

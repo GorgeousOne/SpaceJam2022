@@ -26,9 +26,6 @@ class GameHandler:
 		self.spawnRange = self.gameSize * 0.4
 		self.gameTicks = 0
 
-	def reset(self):
-		self.gameTicks = 0
-
 	def spawn_spaceship(self, pilot: SpaceshipPilot, color: b2Color = b2Color(1, 0.73, 0)):
 		angle = random.uniform(-math.pi, math.pi)
 		distance = self.spawnRange * math.acos(random.uniform(0, 1)) / math.pi
