@@ -104,12 +104,7 @@ class MenuGui(glooey.Gui):
 class GameMenu:
 
 	def __init__(self, window: PygletWindow, background: BoxBackground, game_start_callback):
-		# https://jotson.itch.io/gravity-pixel-font
-		font_path = fileLoad.resource_path(os.path.sep.join(["res", "GravityBold8.ttf"]))
-		pyglet.font.add_file(font_path)
-
 		self.window = window
-		# self.gameMatrixF = game_matrixf
 		self.background = background
 		self.gameStartCallback = game_start_callback
 

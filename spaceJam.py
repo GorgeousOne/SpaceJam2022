@@ -1,3 +1,5 @@
+import os
+
 import pyglet
 
 from game.boxBackground import BoxBackground
@@ -6,6 +8,9 @@ from game.gameSimulation import GameSimulation
 from render.settings import fwSettings
 
 from pyglet import gl
+
+from util import fileLoad
+
 
 class SpaceJam:
 
@@ -29,6 +34,10 @@ class SpaceJam:
 		self.window = pyglet.window.Window(config=pyglet.gl.Config(sample_buffers=1, samples=8), width=self.windowSize, height=self.windowSize)
 		self.window.set_caption("Space Jam")
 		self.gameSize = 100
+
+		# https://jotson.itch.io/gravity-pixel-font
+		font_path = fileLoad.resource_path(os.path.sep.join(["res", "GravityBold8.ttf"]))
+		pyglet.font.add_file(font_path)
 
 		self.background = BoxBackground(self.gameSize, fwSettings.hz)
 		self.menu = None
