@@ -7,8 +7,8 @@ from pyglet import gl
 from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
 
-import pilots.afkPilot
-import pilots.circlePilot
+import pilots.afkBot
+import pilots.circleBot
 
 from game.boxBackground import BoxBackground
 from render.pygletDraw import PygletDraw
@@ -224,8 +224,8 @@ class GameMenu:
 			self.readyButton.disable()
 
 	def _load_default_pilots(self):
-		self._add_available_pilot(pilots.afkPilot.AfkPilot)
-		self._add_available_pilot(pilots.circlePilot.CirclePilot)
+		self._add_available_pilot(pilots.afkBot.AfkBot)
+		self._add_available_pilot(pilots.circleBot.CircleBot)
 		# can't get it to work with pyinstaller
 		# pkg_path = fileLoad.resource_path(pilots.__name__)
 		# for importer, modname, ispkg in pkgutil.iter_modules([pkg_path]):

@@ -1,5 +1,5 @@
 import math
-from typing import Tuple, List
+from typing import List
 
 import numpy as np
 from Box2D import (b2World, b2PolygonShape, b2FixtureDef, b2Color, b2Vec2)
@@ -66,6 +66,7 @@ class BoxSpaceship:
 
 	def __init__(self, world: b2World, pilot: SpaceshipPilot, health: int, color: b2Color = b2Color(1., 1., 1.), pos: b2Vec2 = b2Vec2(0, 0), angle: float = 0):
 		self.pilot = pilot
+		self.max_health = health
 		self.health = health
 		self.energy = 0
 
@@ -105,12 +106,38 @@ class BoxSpaceship:
 		vel = self.body.linearVelocity
 		return Location(np.array([pos.x, pos.y]), np.array([vel.x, vel.y]))
 
-	def display(self, renderer: PygletDraw, layer_index: int):
-		# self.body.angle = math.atan2(self.body.linearVelocity.y, self.body.linearVelocity.x)
+	def display(self, renderer: PygletDraw, layer_index: int, text_layer_index: int):
 		vertices = []
 
-		# for v in self.shape.vertices:
 		for v in viewbox:
 			vertices.append(self.body.GetWorldPoint(v))
-		# renderer.DrawSolidPolygon(vertices, self.color)
 		renderer.DrawIndexedTriangles(layer_index, vertices, triangle_indices, self.color)
+
+		pos = b2Vec2(self.body.position) + b2Vec2(0, 7)
+		renderer.DrawText(text_layer_index, type(self.pilot).__name__, pos, "GravityRegular5", 8)
+
+		damaged_color = b2Color(1, 1, 1)
+		damaged_color.a = 0.2
+		self.display_healthbar(renderer, b2Color(1, 1, 1), damaged_color)
+
+	def display_healthbar(self, renderer: PygletDraw, healthy_color, damaged_color):
+		width = 10
+		height = 0.6
+		border = (float(self.health) / self.max_health - 0.5) * width
+		offset = 4
+
+		pos = b2Vec2(self.body.position)
+		healthy_verts = [
+			b2Vec2(pos) + b2Vec2(-width/2, offset + height),
+			b2Vec2(pos) + b2Vec2(border, offset + height),
+			b2Vec2(pos) + b2Vec2(border, offset),
+			b2Vec2(pos) + b2Vec2(-width/2, offset),
+		]
+		damaged_verts = [
+			b2Vec2(pos) + b2Vec2(border, offset + height),
+			b2Vec2(pos) + b2Vec2(width / 2, offset + height),
+			b2Vec2(pos) + b2Vec2(width / 2, offset),
+			b2Vec2(pos) + b2Vec2(border, offset),
+		]
+		renderer.DrawGradientRect(7, healthy_verts, healthy_color, healthy_color)
+		renderer.DrawGradientRect(7, damaged_verts, damaged_color, damaged_color)

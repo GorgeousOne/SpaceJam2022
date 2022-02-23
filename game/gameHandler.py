@@ -19,16 +19,18 @@ class GameHandler:
 	def __init__(self, world: b2World, contact_handler: BoxContactListener, game_size: int):
 		self.world = world
 		self.contactHandler = contact_handler
-		self.rocketSpeed = 10
-		self.tickEnergy = 100
-		self.colorScanSuccess = b2Color(1, .2, .2)
 		self.gameSize = game_size
-		self.spawnRange = self.gameSize * 0.4
+
+		self.spaceshipHealth = 100
+		self.rocketSpeed = 10
+		self.energyPerTick = 100
+		self.scanSuccessColor = b2Color(1, .2, .2)
+		self.spaceshipSpawnRange = self.gameSize * 0.4
 		self.gameTicks = 0
 
 	def spawn_spaceship(self, pilot: SpaceshipPilot, color: b2Color = b2Color(1, 0.73, 0)):
 		angle = random.uniform(-math.pi, math.pi)
-		distance = self.spawnRange * math.acos(random.uniform(0, 1)) / math.pi
+		distance = self.spaceshipSpawnRange * math.acos(random.uniform(0, 1)) / math.pi
 		pos = b2Vec2(
 			self.gameSize/2 + math.cos(angle) * distance,
 			self.gameSize/2 + math.sin(angle) * distance)
@@ -37,7 +39,7 @@ class GameHandler:
 	def update(self):
 		for spaceship in self.contactHandler.spaceships:
 			# try:
-			action = spaceship.update(self.tickEnergy)
+			action = spaceship.update(self.energyPerTick)
 			self.handle_pilot_action(spaceship, action)
 			# except Exception as e:
 			# 	print(str(e.__traceback__))
@@ -75,7 +77,7 @@ class GameHandler:
 				scan.get("radius"),
 				scan.get("direction"),
 				scan.get("angle"),
-				self.colorScanSuccess))
+				self.scanSuccessColor))
 		else:
 			self.contactHandler.add_scan(BoxScan(
 				spaceship.get_location().get_position(),

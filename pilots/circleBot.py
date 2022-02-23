@@ -8,7 +8,7 @@ from logic.pilotAction import PilotAction
 from logic.spaceshipPilot import SpaceshipPilot
 
 
-class CirclePilot(SpaceshipPilot):
+class CircleBot(SpaceshipPilot):
 
 	def __init__(self, game_width=0, spaceship_size=0):
 		super().__init__(game_width, spaceship_size)

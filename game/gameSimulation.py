@@ -47,11 +47,10 @@ class GameSimulation(PygletFramework):
 		if self.frameCount % (self.settings.hz // 5) == 0:
 			self.gameHandler.update()
 
+		# don't draw shapes and texts on same layer :P
 		self.contactHandler.remove_bodies()
+		self.background.display(self.renderer, 0, self.frameCount)
 
-		# try to keep the amount of layers low :P
-		for ship in self.contactHandler.spaceships:
-			ship.display(self.renderer, 0)
 		for explosion in self.contactHandler.explosions:
 			explosion.display(self.renderer, 1)
 		for scan in self.contactHandler.scans:
@@ -59,8 +58,12 @@ class GameSimulation(PygletFramework):
 		for rocket in self.contactHandler.rockets:
 			rocket.display(self.renderer, 1)
 
-		self.border.display(self.renderer, 0)
-		self.background.display(self.renderer, 2, self.frameCount)
+		text_layer = 4
+		for ship in self.contactHandler.spaceships:
+			ship.display(self.renderer, 2, text_layer)
+			text_layer += 1
+
+		self.border.display(self.renderer, 3)
 		self.renderer.StartDraw()
 		self.frameCount += 1
 

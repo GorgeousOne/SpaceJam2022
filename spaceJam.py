@@ -36,16 +36,23 @@ class SpaceJam:
 		self.gameSize = 100
 
 		# https://jotson.itch.io/gravity-pixel-font
-		font_path = fileLoad.resource_path(os.path.sep.join(["res", "GravityBold8.ttf"]))
-		pyglet.font.add_file(font_path)
+		self.load_font("GravityBold8.ttf")
+		self.load_font("GravityRegular5.ttf")
 
 		self.background = BoxBackground(self.gameSize, fwSettings.hz)
 		self.menu = None
 		self.simulation = None
 		gl.glLoadMatrixf(self.get_game_projection())
+		gl.glEnable(gl.GL_BLEND)
+		gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
 
 		self._start_menu()
 		pyglet.app.run()
+
+	def load_font(self, file_name: str):
+		font_path = fileLoad.resource_path("res" + os.path.sep + file_name)
+		pyglet.font.add_file(font_path)
+
 
 	def _start_menu(self):
 		self.menu = GameMenu(self.window, self.background, self._start_game)

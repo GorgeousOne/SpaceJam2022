@@ -41,7 +41,7 @@ import string
 import pyglet
 from Box2D import (b2Vec2, b2World, b2AABB, b2QueryCallback, b2_dynamicBody, b2DestructionListener, b2Joint, b2Fixture)
 
-from render.pygletDraw import grText, PygletDraw
+from render.pygletDraw import TextLayer, PygletDraw
 from render.settings import fwSettings
 
 
@@ -155,9 +155,6 @@ class PygletFramework:
 		self.world.destructionListener = self.destructionListener
 		self.window = window
 
-		# Initialize the text display group
-		self.textGroup = grText(self.window)
-
 		# Load the font and record the screen dimensions
 		self.font = pyglet.font.load(self.fontname, self.fontsize)
 		self.screenSize = b2Vec2(self.window.width, self.window.height)
@@ -207,7 +204,7 @@ class PygletFramework:
 		self.window.push_handlers(self.keys)
 
 		# Create a new batch for drawing
-		self.renderer.clear_layers()
+		self.renderer.clear_batch()
 
 		# Step the physics
 		self.Step(self.settings)
@@ -368,9 +365,6 @@ class PygletFramework:
 		Takes screen (x, y) and returns
 		world coordinate b2Vec2(x,y).
 		"""
-		u = float(x) / self.window.width
-		v = float(y) / self.window.height
-
 		ratio = float(self.window.width) / self.window.height
 		extents = b2Vec2(ratio, 1.0)
 		extents *= self.renderer.viewZoom
@@ -378,28 +372,13 @@ class PygletFramework:
 		lower = self.renderer.viewCenter - extents
 		upper = self.renderer.viewCenter + extents
 
+		u = float(x) / self.window.width
+		v = float(y) / self.window.height
+
 		p = b2Vec2(
 			(1.0 - u) * lower.x + u * upper.x,
 			(1.0 - v) * lower.y + v * upper.y)
 		return p
-
-	def DrawStringAt(self, x, y, str, color=(229, 153, 153, 255)):
-		"""
-		Draw some text, str, at screen coordinates (x, y).
-		"""
-		pyglet.text.Label(str, font_name=self.fontname,
-		                  font_size=self.fontsize, x=x, y=self.window.height - y,
-		                  color=color, batch=self.renderer.get_or_create_layer(0), group=self.textGroup)
-
-	def Print(self, str, color=(229, 153, 153, 255)):
-		"""
-		Draw some text, str, at screen coordinates (x, y).
-		"""
-		pyglet.text.Label(str, font_name=self.fontname,
-		                  font_size=self.fontsize, x=5, y=self.window.height -
-		                                                  self.textLine, color=color, batch=self.renderer.get_or_create_layer(0),
-		                  group=self.textGroup)
-		self.textLine += 15
 
 	def Keyboard(self, key):
 		"""
