@@ -12,14 +12,16 @@ from logic import scanning
 from logic.location import Location
 from logic.pilotAction import PilotAction
 from logic.spaceshipPilot import SpaceshipPilot
+from util import colorParse
 
 
 class GameHandler:
 
-	def __init__(self, world: b2World, contact_handler: BoxContactListener, game_size: int):
+	def __init__(self, world: b2World, contact_handler: BoxContactListener, game_size: int, frames_per_tick: float):
 		self.world = world
 		self.contactHandler = contact_handler
 		self.gameSize = game_size
+		self.framesPerTick = frames_per_tick
 
 		self.spaceshipHealth = 100
 		self.rocketSpeed = 10
@@ -27,13 +29,15 @@ class GameHandler:
 		self.scanSuccessColor = b2Color(1, .2, .2)
 		self.spaceshipSpawnRange = self.gameSize * 0.4
 
-	def spawn_spaceship(self, pilot: SpaceshipPilot, color: b2Color = b2Color(1, 0.73, 0)):
+	def spawn_spaceship(self, pilot: SpaceshipPilot):
 		angle = random.uniform(-math.pi, math.pi)
 		distance = self.spaceshipSpawnRange * math.acos(random.uniform(0, 1)) / math.pi
 		pos = b2Vec2(
 			self.gameSize/2 + math.cos(angle) * distance,
 			self.gameSize/2 + math.sin(angle) * distance)
-		self.contactHandler.add_spaceship(BoxSpaceship(self.world, pilot, 60, color, pos, random.uniform(-math.pi, math.pi)))
+
+		ship_color = colorParse.rgb_to_b2color(colorParse.hex_to_rgb(pilot.shipColor))
+		self.contactHandler.add_spaceship(BoxSpaceship(self.world, pilot, 60, 100, ship_color, pos, random.uniform(-math.pi, math.pi)))
 
 	def update(self):
 		for spaceship in self.contactHandler.spaceships:
@@ -101,7 +105,7 @@ class GameHandler:
 
 	def handle_pilot_move(self, spaceship: BoxSpaceship, move: dict):
 		# TODO test energy cost
-		force = angle2vec(move.get("direction")) * move.get("power")
+		force = angle2vec(move.get("direction")) * (move.get("power") / self.framesPerTick)
 		spaceship.move(force)
 
 	def handle_pilot_shoot(self, spaceship: BoxSpaceship, shoot: dict):

@@ -27,10 +27,11 @@ class GameSimulation(PygletFramework):
 		self.isSimulationRunning = False
 
 		self.frameCount = 0
+		self.gameTicksPerSecond = 5
 
 		self.contactHandler = BoxContactListener(self.world)
 		self.world.contactListener = self.contactHandler
-		self.gameHandler = GameHandler(self.world, self.contactHandler, self.gameSize)
+		self.gameHandler = GameHandler(self.world, self.contactHandler, self.gameSize, self.settings.hz / self.gameTicksPerSecond)
 		self._create_game_field()
 
 		self.startMenu = StartMenu(self.window, lambda: self.start_simulation(self.startMenu.get_selected_pilot_classes()))
@@ -65,8 +66,8 @@ class GameSimulation(PygletFramework):
 		self.gui = self.gamOverMenu
 		self.gamOverMenu.unhide()
 
-		if len(self.contactHandler.spaceships) > 0:
-			self.gamOverMenu.set_winner(next(iter(self.contactHandler.spaceships)).name)
+		if self.frameCount % (self.settings.hz // self.gameTicksPerSecond) == 0:
+			self.gameHandler.update()
 
 	def display(self, dt):
 		if self.isSimulationRunning:

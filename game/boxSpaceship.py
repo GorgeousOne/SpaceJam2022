@@ -64,12 +64,13 @@ viewbox = [b2Vec2(v[0], v[1]) for v in viewbox]
 
 class BoxSpaceship:
 
-	def __init__(self, world: b2World, pilot: SpaceshipPilot, health: int, color: b2Color = b2Color(1., 1., 1.), pos: b2Vec2 = b2Vec2(0, 0), angle: float = 0):
+	def __init__(self, world: b2World, pilot: SpaceshipPilot, max_health: int, max_energy: int, color: b2Color = b2Color(1., 1., 1.), pos: b2Vec2 = b2Vec2(0, 0), angle: float = 0):
 		self.pilot = pilot
 		self.name = type(pilot).__name__
-		self.max_health = health
-		self.health = health
-		self.energy = 0
+		self.max_health = max_health
+		self.health = max_health
+		self.max_energy = max_energy
+		self.energy = max_energy
 
 		self.color = b2Color(color)
 		self.shape = b2PolygonShape(vertices=hitbox)
@@ -117,28 +118,32 @@ class BoxSpaceship:
 		pos = b2Vec2(self.body.position) + b2Vec2(0, 7)
 		renderer.DrawText(text_layer_index, self.name, pos, "GravityRegular5", 8)
 
-		damaged_color = b2Color(1, 1, 1)
-		damaged_color.a = 0.2
-		self.display_healthbar(renderer, b2Color(1, 1, 1), damaged_color)
+		self.display_bar(renderer, layer_index, self.health/self.max_health, 5.0, b2Color(0.9, 0.0, 0.0))
+		self.display_bar(renderer, layer_index, self.energy/self.max_energy, 4.0, b2Color(0.1, 0.25, 1.0))
 
-	def display_healthbar(self, renderer: PygletDraw, healthy_color, damaged_color):
-		width = 10
-		height = 0.6
-		border = (float(self.health) / self.max_health - 0.5) * width
-		offset = 4
+	def display_bar(self, renderer: PygletDraw, layer_index: int, percent: float, offset: float, color: b2Color = b2Color(1.0, 1.0, 1.0), width: float = 10, height: float = 0.6):
+		color_missing = b2Color(color)
+		color_missing.a = 0.5
 
-		pos = b2Vec2(self.body.position)
-		healthy_verts = [
-			b2Vec2(pos) + b2Vec2(-width/2, offset + height),
-			b2Vec2(pos) + b2Vec2(border, offset + height),
-			b2Vec2(pos) + b2Vec2(border, offset),
-			b2Vec2(pos) + b2Vec2(-width/2, offset),
+		pos = self.body.position
+		x_min = pos.x - width/2
+		x_max = x_min + width
+		x_mid = x_min + percent * width
+
+		y_min = pos.y + offset
+		y_max = y_min + height
+
+		remaining_verts = [
+			b2Vec2(x_min, y_min),
+			b2Vec2(x_min, y_max),
+			b2Vec2(x_mid, y_max),
+			b2Vec2(x_mid, y_min),
 		]
-		damaged_verts = [
-			b2Vec2(pos) + b2Vec2(border, offset + height),
-			b2Vec2(pos) + b2Vec2(width / 2, offset + height),
-			b2Vec2(pos) + b2Vec2(width / 2, offset),
-			b2Vec2(pos) + b2Vec2(border, offset),
+		missing_verts = [
+			b2Vec2(x_mid, y_min),
+			b2Vec2(x_mid, y_max),
+			b2Vec2(x_max, y_max),
+			b2Vec2(x_max, y_min),
 		]
-		renderer.DrawGradientRect(7, healthy_verts, healthy_color, healthy_color)
-		renderer.DrawGradientRect(7, damaged_verts, damaged_color, damaged_color)
+		renderer.DrawGradientRect(layer_index, remaining_verts, color, color)
+		renderer.DrawGradientRect(layer_index, missing_verts, color_missing, color_missing)

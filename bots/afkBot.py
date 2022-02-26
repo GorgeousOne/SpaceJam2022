@@ -12,9 +12,10 @@ from logic.spaceshipPilot import SpaceshipPilot
 class AfkBot(SpaceshipPilot):
 
 	def __init__(self, game_width = 0, spaceship_size = 0):
-		super().__init__(game_width, spaceship_size)
+		super().__init__(game_width, spaceship_size, "#FFBB00")
 		self.gameTick = 0
 		self.angle = random.random() * math.pi * 2
+		self.isStart = True
 
 	def update(self, current_location: Location, current_health: float, current_energy: float) -> PilotAction:
 		action = PilotAction()
