@@ -11,7 +11,7 @@ class SpaceshipPilot:
 		self.spaceshipSize = spaceship_size
 		self.shipColor = ship_color
 
-	def update(self, current_location: Location, current_health: float, current_energy: float) -> PilotAction:
+	def update(self, game_tick: int, current_location: Location, current_health: float, current_energy: float) -> PilotAction:
 		raise NotImplementedError()
 
 	def process_scan(self, current_action: PilotAction, located_rockets: List[Location]) -> PilotAction:

@@ -13,28 +13,26 @@ class CircleBot(SpaceshipPilot):
 	def __init__(self, game_width=0, spaceship_size=0):
 		super().__init__(game_width, spaceship_size, "#2D82F0")
 		self.center = np.array([self.gameWidth / 2, self.gameWidth / 2])
-		self.updateCount = 0
 		self.speed = 5
 		self.radius = 30
 		self.angleStep = self.speed / self.radius
 		self.startAngle = 0
 
-	def update(self, current_location: Location, current_health: float, current_energy: float) -> PilotAction:
-		self.updateCount += 1
+	def update(self, game_tick: int, current_location: Location, current_health: float, current_energy: float) -> PilotAction:
 
 		action = PilotAction()
 		pos = current_location.get_position()
 
-		if self.updateCount == 1:
+		if game_tick == 1:
 			self.startAngle = vec_angle(pos - self.center)
 
-		angle = self.startAngle + self.updateCount * self.angleStep
+		angle = self.startAngle + game_tick * self.angleStep
 		target = self.center + np.array([np.cos(angle), np.sin(angle)]) * self.radius
 		vel = current_location.get_velocity()
 		impulse = target - (pos + vel)
 		action.move_spaceship(vec_angle(impulse), np.linalg.norm(impulse))
 
-		if self.updateCount % 5 == 0:
+		if game_tick % 5 == 0:
 			center_dir = vec_angle(self.center - pos)
 			action.shoot_rocket(center_dir - math.pi/2)
 			action.scan_area(50, center_dir, math.pi / 8)

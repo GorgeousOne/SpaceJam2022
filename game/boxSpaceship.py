@@ -86,15 +86,24 @@ class BoxSpaceship:
 			fixedRotation=True  # fixes angular velocity to one value
 		)
 
-	def update(self, new_energy) -> PilotAction:
-		self.energy = new_energy
-		return self.pilot.update(self.get_location(), self.health, self.energy)
+	def update(self, game_tick) -> PilotAction:
+		return self.pilot.update(game_tick, self.get_location(), self.health, self.energy)
+
+	def add_energy(self, energy_amount):
+		self.energy = min(self.max_energy, self.energy + energy_amount)
+
+	def use_energy(self, energy_amount):
+		self.energy = max(0, self.energy - energy_amount)
 
 	def process_scan(self, current_action: PilotAction, located_rockets: List[Location]) -> PilotAction:
 		return self.pilot.process_scan(current_action, located_rockets)
 
-	def move(self, impulse: b2Vec2):
+	def move(self, impulse: b2Vec2, max_velocity):
 		self.body.linearVelocity += impulse
+		current_velocity = self.body.linearVelocity.length
+		if current_velocity > max_velocity:
+			self.body.linearVelocity *= max_velocity / current_velocity
+
 		if self.body.linearVelocity.y != 0 or self.body.linearVelocity.x != 0:
 			self.body.angle = math.atan2(self.body.linearVelocity.y, self.body.linearVelocity.x)
 
@@ -133,17 +142,19 @@ class BoxSpaceship:
 		y_min = pos.y + offset
 		y_max = y_min + height
 
-		remaining_verts = [
-			b2Vec2(x_min, y_min),
-			b2Vec2(x_min, y_max),
-			b2Vec2(x_mid, y_max),
-			b2Vec2(x_mid, y_min),
-		]
-		missing_verts = [
-			b2Vec2(x_mid, y_min),
-			b2Vec2(x_mid, y_max),
-			b2Vec2(x_max, y_max),
-			b2Vec2(x_max, y_min),
-		]
-		renderer.DrawGradientRect(layer_index, remaining_verts, color, color)
-		renderer.DrawGradientRect(layer_index, missing_verts, color_missing, color_missing)
+		if percent > 0:
+			remaining_verts = [
+				b2Vec2(x_min, y_min),
+				b2Vec2(x_min, y_max),
+				b2Vec2(x_mid, y_max),
+				b2Vec2(x_mid, y_min),
+			]
+			renderer.DrawGradientRect(layer_index, remaining_verts, color, color)
+		if percent < 1:
+			missing_verts = [
+				b2Vec2(x_mid, y_min),
+				b2Vec2(x_mid, y_max),
+				b2Vec2(x_max, y_max),
+				b2Vec2(x_max, y_min),
+			]
+			renderer.DrawGradientRect(layer_index, missing_verts, color_missing, color_missing)

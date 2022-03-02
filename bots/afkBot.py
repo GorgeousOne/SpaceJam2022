@@ -17,7 +17,7 @@ class AfkBot(SpaceshipPilot):
 		self.angle = random.random() * math.pi * 2
 		self.isStart = True
 
-	def update(self, current_location: Location, current_health: float, current_energy: float) -> PilotAction:
+	def update(self, game_tick: int, current_location: Location, current_health: float, current_energy: float) -> PilotAction:
 		action = PilotAction()
 		if self.gameTick % 10 == 0:
 			action.shoot_rocket(self.angle)
