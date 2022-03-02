@@ -4,6 +4,7 @@ import pyglet
 
 from game.boxBackground import BoxBackground
 from game.gameMenu import GameMenu
+from game.gameOverMenu import GameOverMenu
 from game.gameSimulation import GameSimulation
 from render.settings import fwSettings
 
@@ -55,6 +56,9 @@ class SpaceJam:
 
 
 	def _start_menu(self):
+		if self.menu:
+			self.menu.cancel()
+			self.menu = None
 		self.menu = GameMenu(self.window, self.background, self._start_game)
 		if self.simulation:
 			self.simulation.cancel()
@@ -62,8 +66,16 @@ class SpaceJam:
 			self.simulation = None
 		self.menu.run(fwSettings.hz)
 
+	def _start_game_over_menu(self):
+		self.menu = GameOverMenu(self.window, self.background, self._start_menu)
+		if self.simulation:
+			self.simulation.cancel()
+			self.menu.set_frame_count(self.simulation.frameCount)
+			self.simulation = None
+		self.menu.run(fwSettings.hz)
+
 	def _start_game(self):
-		self.simulation = GameSimulation(self.window, self.background, self.menu.get_selected_pilot_classes(), self._start_menu)
+		self.simulation = GameSimulation(self.window, self.background, self.menu.get_selected_pilot_classes(), self._start_game_over_menu)
 		if self.menu:
 			self.menu.cancel()
 			self.simulation.set_frame_count(self.menu.frameCount)

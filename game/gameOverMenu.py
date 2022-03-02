@@ -95,7 +95,7 @@ class MenuGui(glooey.Gui):
 		pass
 
 
-class GameMenu:
+class GameOverMenu:
 
 	def __init__(self, window: PygletWindow, background: BoxBackground, game_start_callback):
 		self.window = window
@@ -122,7 +122,7 @@ class GameMenu:
 		gameTitle.set_padding(20)
 		root.add(gameTitle)
 
-		self.readyButton = CustomButton("Not Ready", lambda widget: self.gameStartCallback())
+		self.readyButton = CustomButton("Proceed", lambda widget: self.gameStartCallback())
 		self.readyButton.set_size_hint(200, 0)
 		self.readyButton.set_alignment("center")
 		self.readyButton.get_foreground().set_alignment("center")
@@ -131,11 +131,17 @@ class GameMenu:
 
 		self.gui.add(root)
 
+	def set_frame_count(self, frame_count: int):
+		self.frameCount = frame_count
+
 	def run(self, fps):
 		pyglet.clock.schedule_interval(self.display, 1.0 / fps)
 
 	def cancel(self):
 		pyglet.clock.unschedule(self.display)
+		self.window.remove_handlers(self.gui)
+		# self.my_observer.stop()
+		# self.my_observer.join()
 
 	def display(self, dt):
 		self.window.clear()
