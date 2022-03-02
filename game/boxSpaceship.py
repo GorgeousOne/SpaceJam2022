@@ -86,8 +86,8 @@ class BoxSpaceship:
 			fixedRotation=True  # fixes angular velocity to one value
 		)
 
-	def update(self, game_tick) -> PilotAction:
-		return self.pilot.update(game_tick, self.get_location(), self.health, self.energy)
+	def update(self, game_tick, ticks_per_second) -> PilotAction:
+		return self.pilot.update(game_tick, self.get_location(ticks_per_second), self.health, self.energy)
 
 	def add_energy(self, energy_amount):
 		self.energy = min(self.max_energy, self.energy + energy_amount)
@@ -98,9 +98,11 @@ class BoxSpaceship:
 	def process_scan(self, current_action: PilotAction, located_rockets: List[Location]) -> PilotAction:
 		return self.pilot.process_scan(current_action, located_rockets)
 
-	def move(self, impulse: b2Vec2, max_velocity):
-		self.body.linearVelocity += impulse
+	def move(self, impulse: b2Vec2, max_velocity_per_tick, ticks_per_second):
+		self.body.linearVelocity += impulse * ticks_per_second
 		current_velocity = self.body.linearVelocity.length
+
+		max_velocity = max_velocity_per_tick * ticks_per_second
 		if current_velocity > max_velocity:
 			self.body.linearVelocity *= max_velocity / current_velocity
 
@@ -112,9 +114,9 @@ class BoxSpaceship:
 		if self.health <= 0:
 			self.color = b2Color(255, 0, 0)
 
-	def get_location(self):
+	def get_location(self, ticks_per_second):
 		pos = self.body.position
-		vel = self.body.linearVelocity
+		vel = self.body.linearVelocity / ticks_per_second
 		return Location(np.array([pos.x, pos.y]), np.array([vel.x, vel.y]))
 
 	def display(self, renderer: PygletDraw, layer_index: int, text_layer_index: int):

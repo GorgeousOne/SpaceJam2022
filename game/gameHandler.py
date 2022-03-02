@@ -17,11 +17,11 @@ from util import colorParse
 
 class GameHandler:
 
-	def __init__(self, world: b2World, contact_handler: BoxContactListener, game_size: int, frames_per_tick: float):
+	def __init__(self, world: b2World, contact_handler: BoxContactListener, game_size: int, ticks_per_second: int):
 		self.world = world
 		self.contactHandler = contact_handler
 		self.gameSize = game_size
-		self.framesPerTick = frames_per_tick
+		self.ticksPerSecond = ticks_per_second
 
 		self.spaceshipHealth = 100
 
@@ -47,7 +47,7 @@ class GameHandler:
 		for spaceship in self.contactHandler.spaceships:
 			spaceship.add_energy(self.energyPerTick)
 			# try:
-			action = spaceship.update(self.gameTicks)
+			action = spaceship.update(self.gameTicks, self.ticksPerSecond)
 			self.handle_pilot_action(spaceship, action)
 			# except Exception as e:
 			# 	print(str(e.__traceback__))
@@ -74,22 +74,22 @@ class GameHandler:
 		spaceship.use_energy(energy_cost)
 
 		located_rockets = scanning.calculate_located_rockets(
-			spaceship.get_location(),
+			spaceship.get_location(self.ticksPerSecond),
 			scan.get("radius"),
 			scan.get("direction"),
 			scan.get("angle"),
-			[other.get_location() for other in self.contactHandler.spaceships if other != spaceship])
+			[other.get_location(self.ticksPerSecond) for other in self.contactHandler.spaceships if other != spaceship])
 
 		if located_rockets:
 			self.contactHandler.add_scan(BoxScan(
-				spaceship.get_location().get_position(),
+				spaceship.get_location(self.ticksPerSecond).get_position(),
 				scan.get("radius"),
 				scan.get("direction"),
 				scan.get("angle"),
 				self.scanSuccessColor))
 		else:
 			self.contactHandler.add_scan(BoxScan(
-				spaceship.get_location().get_position(),
+				spaceship.get_location(self.ticksPerSecond).get_position(),
 				scan.get("radius"),
 				scan.get("direction"),
 				scan.get("angle")))
@@ -115,8 +115,8 @@ class GameHandler:
 		# if energy_cost > spaceship.energy:
 		# 	return
 		# spaceship.use_energy(energy_cost)
-		force = angle2vec(move.get("direction")) * (move.get("power")) #  / self.framesPerTick
-		spaceship.move(force, self.maxSpaceshipSpeedPerTick / self.framesPerTick)
+		force = angle2vec(move.get("direction")) * (move.get("power"))
+		spaceship.move(force, self.maxSpaceshipSpeedPerTick, self.ticksPerSecond)
 
 	def handle_pilot_shoot(self, spaceship: BoxSpaceship, shoot: dict):
 		energy_cost = 25

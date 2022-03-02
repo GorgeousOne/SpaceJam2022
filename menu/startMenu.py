@@ -6,9 +6,7 @@ from pyglet import gl
 from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
 
-import bots.afkBot
-import bots.circleBot
-import bots.batman
+from bots import afkBot, circleBot, batman, testBot
 
 from menu.menuWidget import CustomButton, ScrollList, MenuGui, Title
 from render.pygletWindow import PygletWindow
@@ -136,9 +134,10 @@ class StartMenu:
 			self.readyButton.disable()
 
 	def _load_default_pilots(self):
-		self._add_available_pilot(bots.afkBot.AfkBot)
-		self._add_available_pilot(bots.circleBot.CircleBot)
-		self._add_available_pilot(bots.batman.Batman)
+		self._add_available_pilot(afkBot.AfkBot)
+		self._add_available_pilot(circleBot.CircleBot)
+		self._add_available_pilot(testBot.TestBot)
+		self._add_available_pilot(batman.Batman)
 
 	# can't get it to work with pyinstaller
 	# pkg_path = fileLoad.resource_path(pilots.__name__)

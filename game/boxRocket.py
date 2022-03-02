@@ -28,7 +28,7 @@ class BoxRocket:
 		self.body = self.world.CreateDynamicBody(
 			userData=self,  # adds a reference on the body to the rocket object
 			allowSleep=True,
-			position=shooter.get_location().get_position(),
+			position=shooter.get_location(0).get_position(),
 			angle=math.atan2(heading.y, heading.x),
 			linearVelocity=heading,
 			fixtures=b2FixtureDef(

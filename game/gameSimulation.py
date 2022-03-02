@@ -31,7 +31,7 @@ class GameSimulation(PygletFramework):
 
 		self.contactHandler = BoxContactListener(self.world)
 		self.world.contactListener = self.contactHandler
-		self.gameHandler = GameHandler(self.world, self.contactHandler, self.gameSize, self.settings.hz / self.gameTicksPerSecond)
+		self.gameHandler = GameHandler(self.world, self.contactHandler, self.gameSize, self.gameTicksPerSecond)
 		self._create_game_field()
 
 		self.startMenu = StartMenu(self.window, lambda: self.start_simulation(self.startMenu.get_selected_pilot_classes()))
