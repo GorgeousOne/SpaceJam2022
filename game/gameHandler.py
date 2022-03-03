@@ -27,12 +27,16 @@ class GameHandler:
 
 		self.maxSpaceshipSpeedPerTick = 5
 		# TODO find good value for energy per tick
-		self.energyPerTick = 20
+		self.energyPerTick = 10
 
-		self.rocketSpeed = 10
+		self.rocketSpeed = 25
 		self.scanSuccessColor = b2Color(1, .2, .2)
 		self.spaceshipSpawnRange = self.gameSize * 0.4
 		self.gameTicks = 0
+
+		self.rocketCost = 50
+		self.accCostPerMeterSecondSq = 1
+		self.scanCostPerMeterSq = 1
 
 	def spawn_spaceship(self, pilot: SpaceshipPilot):
 		angle = random.uniform(-math.pi, math.pi)
@@ -112,20 +116,20 @@ class GameHandler:
 		self.handle_pilot_action(spaceship, action)
 
 	def handle_pilot_move(self, spaceship: BoxSpaceship, move: dict):
-		energy_cost = move.get("power")
-		# if energy_cost > spaceship.energy:
-		# 	return
-		# spaceship.use_energy(energy_cost)
+		power = max(0, min(self.maxSpaceshipSpeedPerTick, move.get("power")))
+		energy_cost = power * self.accCostPerMeterSecondSq
+
+		if energy_cost > spaceship.energy:
+			return
+		spaceship.use_energy(energy_cost)
 		force = angle2vec(move.get("direction")) * (move.get("power"))
 		spaceship.move(force, self.maxSpaceshipSpeedPerTick, self.ticksPerSecond)
 
 	def handle_pilot_shoot(self, spaceship: BoxSpaceship, shoot: dict):
-		energy_cost = 25
-		if energy_cost > spaceship.energy:
+		if self.rocketCost > spaceship.energy:
 			return
-		spaceship.use_energy(energy_cost)
-
-		direction = angle2vec(shoot.get("angle")) * 30
+		spaceship.use_energy(self.rocketCost)
+		direction = angle2vec(shoot.get("angle")) * self.rocketSpeed
 		self.contactHandler.add_rocket(BoxRocket(self.world, spaceship, direction))
 
 

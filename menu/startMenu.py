@@ -62,7 +62,7 @@ class StartMenu:
 		self.readyButton.disable()
 		root.add(self.readyButton)
 		self.gui.add(root)
-		self.gui.hide()
+		self.hide()
 
 	def _setup_watchdog(self):
 		patterns = ["*.py"]
@@ -88,10 +88,12 @@ class StartMenu:
 		return selected_pilots
 
 	def unhide(self):
+		self.window.push_handlers(self.gui)
 		self.gui.unhide()
 
 	def hide(self):
 		self.gui.hide()
+		self.window.remove_handlers(self.gui)
 
 	def display(self):
 		gl.glPushMatrix()

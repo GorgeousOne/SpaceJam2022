@@ -16,3 +16,10 @@ class SpaceshipPilot:
 
 	def process_scan(self, current_action: PilotAction, located_rockets: List[Location]) -> PilotAction:
 		raise NotImplementedError()
+
+	# def prepare_scan(self, game_tick: int, current_location: Location, current_health: float, current_energy: float) -> PilotAction:
+	# 	raise NotImplementedError()
+	#
+	# def update(self, game_tick: int, current_location: Location, current_health: float, current_energy: float, located_rockets: List[numpy.ndarray]) -> PilotAction:
+	# 	raise NotImplementedError()
+

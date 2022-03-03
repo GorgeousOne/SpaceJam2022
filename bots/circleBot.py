@@ -13,33 +13,36 @@ class CircleBot(SpaceshipPilot):
 	def __init__(self, game_width=0, spaceship_size=0):
 		super().__init__(game_width, spaceship_size, "#2D82F0")
 		self.center = np.array([self.gameWidth / 2, self.gameWidth / 2])
-		self.speed = 5
+		self.speed = 3
 		self.radius = 30
 		self.angleStep = self.speed / self.radius
 		self.startAngle = 0
+
+	def prepare_scan(self, game_tick: int, current_location: Location, current_health: float, current_energy: float) -> PilotAction:
+		raise NotImplementedError()
 
 	def update(self, game_tick: int, current_location: Location, current_health: float, current_energy: float) -> PilotAction:
 		action = PilotAction()
 		pos = current_location.get_position()
 
-		if game_tick == 1:
+		if game_tick == 0:
 			self.startAngle = vec_angle(pos - self.center)
 
 		angle = self.startAngle + game_tick * self.angleStep
 		target = self.center + np.array([np.cos(angle), np.sin(angle)]) * self.radius
 		vel = current_location.get_velocity()
 		impulse = target - (pos + vel)
-		action.move_spaceship(vec_angle(impulse), np.linalg.norm(impulse))
+		action.move_spaceship(vec_angle(impulse), min(self.speed, np.linalg.norm(impulse)))
 
 		if game_tick % 5 == 0:
+			# action.scan_area(50, center_dir, math.pi / 16)
 			center_dir = vec_angle(self.center - pos)
 			action.shoot_rocket(center_dir - math.pi/2)
-			action.scan_area(50, center_dir, math.pi / 8)
+
 		return action
 
 	def process_scan(self, current_action: PilotAction, located_rockets: List[Location]) -> PilotAction:
-		return current_action
-
+		pass
 
 def vec_angle(vec: np.ndarray):
 	return math.atan2(vec[1], vec[0])

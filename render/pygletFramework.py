@@ -41,7 +41,7 @@ import string
 import pyglet
 from Box2D import (b2Vec2, b2World, b2AABB, b2QueryCallback, b2_dynamicBody, b2DestructionListener, b2Joint, b2Fixture)
 
-from render.pygletDraw import TextLayer, PygletDraw
+from render.pygletDraw import PygletDraw
 from render.settings import fwSettings
 
 
@@ -119,7 +119,6 @@ class PygletFramework:
 		Keys.K_COMMA = key.COMMA
 
 	def __reset(self):
-
 		self.world = None
 		self.mouseJoint = None
 		self.settings = fwSettings
@@ -270,8 +269,6 @@ class PygletFramework:
 		self.mouseWorld = p
 		self.MouseMove(p)
 
-
-	
 	def _Keyboard_Event(self, key, down=True):
 		"""
 		Internal keyboard event, don't override this.

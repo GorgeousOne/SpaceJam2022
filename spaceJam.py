@@ -34,6 +34,10 @@ class SpaceJam:
 		self.windowSize = 600
 		self.window = pyglet.window.Window(config=pyglet.gl.Config(sample_buffers=1, samples=8), width=self.windowSize, height=self.windowSize)
 		self.window.set_caption("Space Jam")
+
+		icon_path = fileLoad.resource_path("res" + os.path.sep + "rocket-icon.png")
+		self.window.set_icon(pyglet.image.load(icon_path))
+
 		self.gameSize = 100
 
 		# https://jotson.itch.io/gravity-pixel-font
