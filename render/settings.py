@@ -27,7 +27,7 @@ class fwSettings(object):
     backend = 'pyglet'
 
     # Physics options
-    hz = 48.0
+    hz = 60.0
     velocityIterations = 8
     positionIterations = 3
     # Makes physics results more accurate (see Box2D wiki)
