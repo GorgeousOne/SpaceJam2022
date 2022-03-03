@@ -2,13 +2,14 @@ import os
 import pkgutil
 
 import glooey
+import pyglet
 from pyglet import gl
 from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
 
 from bots import afkBot, circleBot, batman, testBot
 
-from menu.menuWidget import CustomButton, ScrollList, MenuGui, Title
+from menu.menuWidget import CustomButton, ScrollList, MenuGui, Title, MenuLabel
 from render.pygletWindow import PygletWindow
 from util import fileLoad
 

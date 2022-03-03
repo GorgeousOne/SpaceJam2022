@@ -13,7 +13,7 @@ class CircleBot(SpaceshipPilot):
 	def __init__(self, game_width=0, spaceship_size=0):
 		super().__init__(game_width, spaceship_size, "#2D82F0")
 		self.center = np.array([self.gameWidth / 2, self.gameWidth / 2])
-		self.speed = 1
+		self.speed = 5
 		self.radius = 30
 		self.angleStep = self.speed / self.radius
 		self.startAngle = 0

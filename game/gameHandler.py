@@ -32,6 +32,7 @@ class GameHandler:
 		self.rocketSpeed = 10
 		self.scanSuccessColor = b2Color(1, .2, .2)
 		self.spaceshipSpawnRange = self.gameSize * 0.4
+		self.gameTicks = 0
 
 	def spawn_spaceship(self, pilot: SpaceshipPilot):
 		angle = random.uniform(-math.pi, math.pi)
