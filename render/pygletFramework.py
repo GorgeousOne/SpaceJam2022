@@ -204,9 +204,6 @@ class PygletFramework:
 		# Update the keyboard status
 		self.window.push_handlers(self.keys)
 
-		# Create a new batch for drawing
-		self.renderer.clear_batch()
-
 		# Step the physics
 		self.Step()
 		# self.window.invalid = True

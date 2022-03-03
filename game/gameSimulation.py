@@ -38,39 +38,47 @@ class GameSimulation(PygletFramework):
 		self._return_to_start()
 
 	def _return_to_start(self):
-		self.contactHandler.reset()
 		self.isSimulationRunning = False
+		self.contactHandler.reset()
+
 		# remove any previous gui from window events
 		if self.gui:
-			self.gui.stop()
+			self.gui.hide()
 
 		self.gui = self.startMenu
-		self.startMenu.start()
+		self.startMenu.unhide()
 
 	def start_simulation(self, pilot_classes: List):
 		if self.gui:
-			self.gui.stop()
+			self.gui.hide()
 			self.gui = None
-
 		for pilot in pilot_classes:
 			self.gameHandler.spawn_spaceship(pilot(self.gameSize, self.spaceshipSize))
-		self.isSimulationRunning = True
+
 		self.stepCount = 0
+		self.isSimulationRunning = True
 
 	def pause_simulation(self):
 		self.isSimulationRunning = False
 
-	def display(self, dt):
-		self.window.clear()
+	def announce_result(self):
+		self.gui = self.gamOverMenu
+		self.gamOverMenu.unhide()
 
+		if len(self.contactHandler.spaceships) > 0:
+			self.gamOverMenu.set_winner(next(iter(self.contactHandler.spaceships)).name)
+
+	def display(self, dt):
 		if self.isSimulationRunning:
 			self.SimulationLoop(1 / self.settings.hz)
 
 		# don't draw shapes and texts on same layer :P
+		self.window.clear()
+		self.renderer.clear_batch()
 		self.background.display(self.renderer, 0, self.frameCount)
 
-		# for explosion in self.contactHandler.explosions:
-		# 	explosion.display(self.renderer, 1)
+		for explosion in self.contactHandler.explosions:
+			explosion.display(self.renderer, 1)
 		for scan in self.contactHandler.scans:
 			scan.display(self.renderer, 1)
 		for rocket in self.contactHandler.rockets:
@@ -87,7 +95,6 @@ class GameSimulation(PygletFramework):
 		if self.gui:
 			self.gui.display()
 		self.frameCount += 1
-		self.window.invalid = True
 
 	def Step(self):
 		super().Step()
@@ -99,13 +106,6 @@ class GameSimulation(PygletFramework):
 			self.gameHandler.update()
 		self.contactHandler.remove_bodies()
 
-	def announce_result(self):
-		self.gui = self.gamOverMenu
-		self.gamOverMenu.start()
-
-		if len(self.contactHandler.spaceships) > 0:
-			self.gamOverMenu.set_winner(next(iter(self.contactHandler.spaceships)).name)
-
 	def _create_game_field(self):
 		self.world.gravity = (0.0, 0.0)
 		self.border = BoxBorder(self.world, self.gameSize, 1)
@@ -113,9 +113,3 @@ class GameSimulation(PygletFramework):
 		self.renderer.setZoom((self.gameSize + 4 * self.border.thickness) / 2)
 		self.renderer.setCenter(b2Vec2(self.gameSize / 2, self.gameSize / 2))
 
-	# def Keyboard(self, key):
-	# 	if key == 32:
-	# 		for ship in self.contactHandler.spaceships:
-	# 			heading = b2Vec2(math.cos(ship.body.angle), math.sin(ship.body.angle)) * 30
-	# 			rocket = BoxRocket(self.world, ship, heading)
-	# 			self.contactHandler.add_rocket(rocket)

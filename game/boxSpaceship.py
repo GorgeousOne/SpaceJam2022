@@ -122,7 +122,6 @@ class BoxSpaceship:
 		self.display_healthbar(renderer, b2Color(1, 1, 1), damaged_color)
 
 	def display_healthbar(self, renderer: PygletDraw, healthy_color, damaged_color):
-		print(self.name)
 		width = 10
 		height = 0.6
 		border = (float(self.health) / self.max_health - 0.5) * width

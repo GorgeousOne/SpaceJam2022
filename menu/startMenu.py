@@ -8,7 +8,6 @@ from watchdog.observers import Observer
 
 import pilots.afkBot
 import pilots.circleBot
-from game.boxBackground import BoxBackground
 from menu.menuWidget import CustomButton, ScrollList, MenuGui, Title
 from render.pygletWindow import PygletWindow
 from util import fileLoad
@@ -29,6 +28,7 @@ class StartMenu:
 
 	def _setup_gui(self):
 		self.gui = MenuGui(self.window)
+
 		root = glooey.VBox()
 		root.set_default_cell_size(1)
 		root.set_cell_padding(20)
@@ -58,9 +58,8 @@ class StartMenu:
 
 		self.readyButton.disable()
 		root.add(self.readyButton)
-
 		self.gui.add(root)
-		self.window.remove_handlers(self.gui)
+		self.gui.hide()
 
 	def _setup_watchdog(self):
 		patterns = ["*.py"]
@@ -85,11 +84,11 @@ class StartMenu:
 				selected_pilots.append(self.pilotClasses[elem.get_foreground().get_text()])
 		return selected_pilots
 
-	def start(self):
-		self.window.push_handlers(self.gui)
+	def unhide(self):
+		self.gui.unhide()
 
-	def stop(self):
-		self.window.remove_handlers(self.gui)
+	def hide(self):
+		self.gui.hide()
 
 	def display(self):
 		gl.glPushMatrix()

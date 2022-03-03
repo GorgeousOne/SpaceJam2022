@@ -1,10 +1,7 @@
 import glooey
-import pyglet
 from pyglet import gl
 
-from game.boxBackground import BoxBackground
 from menu.menuWidget import MenuGui, Title, CustomButton
-from render.pygletDraw import PygletDraw
 from render.pygletWindow import PygletWindow
 
 
@@ -13,43 +10,41 @@ class GameOverMenu:
 	def __init__(self, window: PygletWindow, return_callback):
 		self.window = window
 		self.returnCallback = return_callback
-
-		self.pilotClasses = {}
 		self._setup_gui()
 
 	def _setup_gui(self):
 		self.gui = MenuGui(self.window)
+
 		root = glooey.VBox()
 		root.set_default_cell_size(1)
-		root.set_cell_padding(20)
-		root.set_top_padding(20)
-		root.set_alignment("top")
+		root.set_cell_padding(40)
+		root.set_bottom_padding(60)
+		root.set_alignment("center")
 
-		self.gameTitle = Title("", font_size=24)
-		self.gameTitle.set_padding(20)
-		root.add(self.gameTitle)
+		self.resultTitle = Title("", font_size=24)
+		root.add(self.resultTitle)
 
-		self.readyButton = CustomButton("Proceed", lambda widget: self.returnCallback())
+		self.readyButton = CustomButton("Return", lambda widget: self.returnCallback())
 		self.readyButton.set_size_hint(200, 0)
 		self.readyButton.set_alignment("center")
 		self.readyButton.get_foreground().set_alignment("center")
 
 		root.add(self.readyButton)
 		self.gui.add(root)
-		self.window.remove_handlers(self.gui)
+		self.gui.hide()
 
 	def set_winner(self, winner: str):
-		self.gameTitle.set_text(winner + " won!")
+		self.resultTitle.set_text(winner + " won!")
 
-	def start(self):
-		self.window.push_handlers(self.gui)
+	def unhide(self):
+		self.gui.unhide()
 
-	def stop(self):
-		self.window.remove_handlers(self.gui)
-		self.gameTitle.set_text("It's a tie...")
+	def hide(self):
+		self.resultTitle.set_text("It's a tie...")
+		self.gui.hide()
 
 	def display(self):
 		gl.glPushMatrix()
 		gl.glLoadIdentity()
 		self.gui.display()
-		pyglet.gl.glPopMatrix()
+		gl.glPopMatrix()
