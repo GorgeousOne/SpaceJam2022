@@ -66,6 +66,7 @@ class BoxSpaceship:
 
 	def __init__(self, world: b2World, pilot: SpaceshipPilot, health: int, color: b2Color = b2Color(1., 1., 1.), pos: b2Vec2 = b2Vec2(0, 0), angle: float = 0):
 		self.pilot = pilot
+		self.name = type(pilot).__name__
 		self.max_health = health
 		self.health = health
 		self.energy = 0
@@ -114,13 +115,14 @@ class BoxSpaceship:
 		renderer.DrawIndexedTriangles(layer_index, vertices, triangle_indices, self.color)
 
 		pos = b2Vec2(self.body.position) + b2Vec2(0, 7)
-		renderer.DrawText(text_layer_index, type(self.pilot).__name__, pos, "GravityRegular5", 8)
+		renderer.DrawText(text_layer_index, self.name, pos, "GravityRegular5", 8)
 
 		damaged_color = b2Color(1, 1, 1)
 		damaged_color.a = 0.2
 		self.display_healthbar(renderer, b2Color(1, 1, 1), damaged_color)
 
 	def display_healthbar(self, renderer: PygletDraw, healthy_color, damaged_color):
+		print(self.name)
 		width = 10
 		height = 0.6
 		border = (float(self.health) / self.max_health - 0.5) * width

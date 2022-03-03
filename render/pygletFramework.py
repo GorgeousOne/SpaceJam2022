@@ -155,6 +155,10 @@ class PygletFramework:
 		self.world.destructionListener = self.destructionListener
 		self.window = window
 
+		self.world.warmStarting = self.settings.enableWarmStarting
+		self.world.continuousPhysics = self.settings.enableContinuous
+		self.world.subStepping = self.settings.enableSubStepping
+
 		# Load the font and record the screen dimensions
 		self.font = pyglet.font.load(self.fontname, self.fontsize)
 		self.screenSize = b2Vec2(self.window.width, self.window.height)
@@ -176,17 +180,14 @@ class PygletFramework:
 		# self.window.push_handlers(self.renderer)
 
 		if self.settings.hz > 0.0:
-			pyglet.clock.schedule_interval(self.SimulationLoop, 1.0 / self.settings.hz)
+			pyglet.clock.schedule_interval(self.display, 1.0 / self.settings.hz)
 
 		# self.window.push_handlers(pyglet.window.event.WindowEventLogger())
 		# TODO: figure out why this is required
 		self.window._enable_event_queue = False
 
 	def cancel(self):
-		pyglet.clock.unschedule(self.SimulationLoop)
-		# self.world.contactListener = None
-		# self.world.destructionListener = None
-		# self.world.renderer = None
+		pyglet.clock.unschedule(self.display)
 		self.window.remove_handlers(self)
 		self.window.remove_handlers(self.renderer)
 
@@ -198,7 +199,7 @@ class PygletFramework:
 		"""
 		# Check the input and clear the screen
 		self.CheckKeys()
-		self.window.clear()
+		# self.window.clear()
 
 		# Update the keyboard status
 		self.window.push_handlers(self.keys)
@@ -207,37 +208,23 @@ class PygletFramework:
 		self.renderer.clear_batch()
 
 		# Step the physics
-		self.Step(self.settings)
-		self.window.invalid = True
+		self.Step()
+		# self.window.invalid = True
 
-	def Step(self, settings):
+	def Step(self):
 		"""
 		The main physics step.
 
 		Takes care of physics drawing (callbacks are executed after the world.Step() )
 		and drawing additional information.
 		"""
-
 		self.stepCount += 1
-		if settings.hz > 0.0:
-			timeStep = 1.0 / settings.hz
-		else:
-			timeStep = 0.0
-
-		# Set the other settings that aren't contained in the flags
-		self.world.warmStarting = settings.enableWarmStarting
-		self.world.continuousPhysics = settings.enableContinuous
-		self.world.subStepping = settings.enableSubStepping
-
-		self.world.Step(timeStep, settings.velocityIterations, settings.positionIterations)
+		time_step = 1.0 / self.settings.hz
+		self.world.Step(time_step, self.settings.velocityIterations, self.settings.positionIterations)
 		self.world.ClearForces()
 
-		self.Redraw()
-
-
-	def Redraw(self):
+	def display(self, dt):
 		raise NotImplementedError()
-
 
 	def on_close(self):
 		"""

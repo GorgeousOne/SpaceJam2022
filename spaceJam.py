@@ -3,8 +3,8 @@ import os
 import pyglet
 
 from game.boxBackground import BoxBackground
-from game.gameMenu import GameMenu
-from game.gameOverMenu import GameOverMenu
+from menu.startMenu import StartMenu
+from menu.gameOverMenu import GameOverMenu
 from game.gameSimulation import GameSimulation
 from render.settings import fwSettings
 
@@ -42,45 +42,46 @@ class SpaceJam:
 
 		self.background = BoxBackground(self.gameSize, fwSettings.hz)
 		self.menu = None
-		self.simulation = None
+		self.game = None
 		gl.glLoadMatrixf(self.get_game_projection())
 		gl.glEnable(gl.GL_BLEND)
 		gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
 
-		self._start_menu()
+		self.game = GameSimulation(self.window)
+		self.game.run()
+		# self._start_menu()
 		pyglet.app.run()
 
 	def load_font(self, file_name: str):
 		font_path = fileLoad.resource_path("res" + os.path.sep + file_name)
 		pyglet.font.add_file(font_path)
 
-
 	def _start_menu(self):
 		if self.menu:
 			self.menu.cancel()
 			self.menu = None
-		self.menu = GameMenu(self.window, self.background, self._start_game)
-		if self.simulation:
-			self.simulation.cancel()
-			self.menu.set_frame_count(self.simulation.frameCount)
-			self.simulation = None
+		self.menu = StartMenu(self.window, self.background, self._start_game)
+		if self.game:
+			self.game.cancel()
+			self.menu.set_frame_count(self.game.frameCount)
+			self.game = None
 		self.menu.run(fwSettings.hz)
 
 	def _start_game_over_menu(self):
 		self.menu = GameOverMenu(self.window, self.background, self._start_menu)
-		if self.simulation:
-			self.simulation.cancel()
-			self.menu.set_frame_count(self.simulation.frameCount)
-			self.simulation = None
+		if self.game:
+			self.game.cancel()
+			self.menu.set_frame_count(self.game.frameCount)
+			self.game = None
 		self.menu.run(fwSettings.hz)
 
 	def _start_game(self):
-		self.simulation = GameSimulation(self.window, self.background, self.menu.get_selected_pilot_classes(), self._start_game_over_menu)
+		self.game = GameSimulation(self.window, self.background, self.menu.get_selected_pilot_classes(), self._start_game_over_menu)
 		if self.menu:
 			self.menu.cancel()
-			self.simulation.set_frame_count(self.menu.frameCount)
+			self.game.set_frame_count(self.menu.frameCount)
 			self.menu = None
-		self.simulation.run()
+		self.game.run()
 
 if __name__ == '__main__':
 	SpaceJam()
