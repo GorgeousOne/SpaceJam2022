@@ -6,7 +6,7 @@ from Box2D import (b2World, b2PolygonShape, b2FixtureDef, b2Color, b2Vec2)
 
 from render.pygletDraw import PygletDraw
 from logic.location import Location
-from logic.pilotAction import PilotAction
+from logic.pilotAction import PilotAction, ScanAction
 from logic.spaceshipPilot import SpaceshipPilot
 
 hitbox = [
@@ -64,9 +64,11 @@ viewbox = [b2Vec2(v[0], v[1]) for v in viewbox]
 
 class BoxSpaceship:
 
-	def __init__(self, world: b2World, pilot: SpaceshipPilot, max_health: int, max_energy: int, color: b2Color = b2Color(1., 1., 1.), pos: b2Vec2 = b2Vec2(0, 0), angle: float = 0):
+	def __init__(self, world: b2World, pilot: SpaceshipPilot, max_health: int, max_energy: float, color: b2Color = b2Color(1., 1., 1.), pos: b2Vec2 = b2Vec2(0, 0), angle: float = 0):
 		self.pilot = pilot
 		self.name = type(pilot).__name__
+		self.displayName = self.name[0:16] if len(self.name) > 16 else self.name
+
 		self.max_health = max_health
 		self.health = max_health
 		self.max_energy = max_energy
@@ -86,20 +88,20 @@ class BoxSpaceship:
 			fixedRotation=True  # fixes angular velocity to one value
 		)
 
-	def update(self, game_tick, ticks_per_second) -> PilotAction:
-		return self.pilot.update(game_tick, self.get_location(ticks_per_second), self.health, self.energy)
-
-	def add_energy(self, energy_amount):
+	def add_energy(self, energy_amount: int):
 		self.energy = min(self.max_energy, self.energy + energy_amount)
 
-	def use_energy(self, energy_amount):
+	def use_energy(self, energy_amount: float):
 		self.energy = max(0, self.energy - energy_amount)
 
-	def process_scan(self, current_action: PilotAction, located_rockets: List[Location]) -> PilotAction:
-		return self.pilot.process_scan(current_action, located_rockets)
+	def prepare_scan(self, game_tick: int, ticks_per_second: int) -> ScanAction:
+		return self.pilot.prepare_scan(game_tick, self.get_location(ticks_per_second), self.health, self.energy)
 
-	def move(self, impulse: b2Vec2, max_velocity_per_tick, ticks_per_second):
-		self.body.linearVelocity += impulse * ticks_per_second
+	def update(self, game_tick: int, ticks_per_second: int, located_rockets: List[np.ndarray]) -> PilotAction:
+		return self.pilot.update(game_tick, self.get_location(ticks_per_second), self.health, self.energy, located_rockets)
+
+	def move(self, acceleration: b2Vec2, max_velocity_per_tick, ticks_per_second):
+		self.body.linearVelocity += acceleration * ticks_per_second
 		current_velocity = self.body.linearVelocity.length
 
 		max_velocity = max_velocity_per_tick * ticks_per_second
@@ -114,7 +116,7 @@ class BoxSpaceship:
 		if self.health <= 0:
 			self.color = b2Color(255, 0, 0)
 
-	def get_location(self, ticks_per_second):
+	def get_location(self, ticks_per_second:int = 1):
 		pos = self.body.position
 		vel = self.body.linearVelocity / ticks_per_second
 		return Location(np.array([pos.x, pos.y]), np.array([vel.x, vel.y]))
@@ -127,7 +129,7 @@ class BoxSpaceship:
 		renderer.DrawIndexedTriangles(layer_index, vertices, triangle_indices, self.color)
 
 		pos = b2Vec2(self.body.position) + b2Vec2(0, 7)
-		renderer.DrawText(text_layer_index, self.name, pos, "GravityRegular5", 8)
+		renderer.DrawText(text_layer_index, self.displayName, pos, "GravityRegular5", 8)
 
 		self.display_bar(renderer, layer_index, self.health/self.max_health, 5.0, b2Color(0.9, 0.0, 0.0))
 		self.display_bar(renderer, layer_index, self.energy/self.max_energy, 4.0, b2Color(0.1, 0.25, 1.0))

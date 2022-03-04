@@ -1,6 +1,5 @@
 import math
 import random
-from typing import List
 
 import numpy as np
 
@@ -16,17 +15,25 @@ class TestBot(SpaceshipPilot):
 		self.angle = random.random() * math.pi * 2
 		self.isStart = True
 
-	def update(self, game_tick: int, current_location: Location, current_health: float, current_energy: float) -> PilotAction:
+	def prepare_scan(
+			self,
+			game_tick: int,
+			current_location: Location,
+			current_health: float,
+			current_energy: float):
+		return None
+
+	def update(
+			self, game_tick: int,
+			current_location: Location,
+			current_health: float,
+			current_energy: float,
+			located_spaceships) -> PilotAction:
 		action = PilotAction()
 		if game_tick == 0:
 			action.move_spaceship(0, 1)
-		elif game_tick % 5 == 0:
-			print(current_location.get_position(), "speed", current_location.get_velocity())
+		if game_tick % 10 == 0:
+			action.shoot_rocket(self.angle)
 		return action
 
-	def process_scan(self, current_action: PilotAction, located_rockets: List[Location]) -> PilotAction:
-		pass
 
-
-def vec_angle(vec: np.ndarray):
-	return math.atan2(vec[1], vec[0])

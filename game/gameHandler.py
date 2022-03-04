@@ -1,7 +1,7 @@
 import math
 import random
-from typing import List
 
+import numpy as np
 from Box2D import b2Vec2, b2World, b2Color
 
 from game.boxContactListener import BoxContactListener
@@ -9,8 +9,7 @@ from game.boxRocket import BoxRocket
 from game.boxScan import BoxScan
 from game.boxSpaceship import BoxSpaceship
 from logic import scanning
-from logic.location import Location
-from logic.pilotAction import PilotAction
+from logic.pilotAction import PilotAction, ScanAction
 from logic.spaceshipPilot import SpaceshipPilot
 from util import colorParse
 
@@ -31,6 +30,7 @@ class GameHandler:
 
 		self.rocketSpeed = 25
 		self.scanSuccessColor = b2Color(1, .2, .2)
+		self.scanFailColor = b2Color(1, 1, 1)
 		self.spaceshipSpawnRange = self.gameSize * 0.4
 		self.gameTicks = 0
 
@@ -42,8 +42,8 @@ class GameHandler:
 		angle = random.uniform(-math.pi, math.pi)
 		distance = self.spaceshipSpawnRange * math.acos(random.uniform(0, 1)) / math.pi
 		pos = b2Vec2(
-			self.gameSize/2 + math.cos(angle) * distance,
-			self.gameSize/2 + math.sin(angle) * distance)
+			self.gameSize / 2 + math.cos(angle) * distance,
+			self.gameSize / 2 + math.sin(angle) * distance)
 
 		ship_color = colorParse.rgb_to_b2color(colorParse.hex_to_rgb(pilot.shipColor))
 		self.contactHandler.add_spaceship(BoxSpaceship(self.world, pilot, 60, 100, ship_color, pos, random.uniform(-math.pi, math.pi)))
@@ -52,7 +52,13 @@ class GameHandler:
 		for spaceship in self.contactHandler.spaceships:
 			spaceship.add_energy(self.energyPerTick)
 			# try:
-			action = spaceship.update(self.gameTicks, self.ticksPerSecond)
+			scan = spaceship.prepare_scan(self.gameTicks, self.ticksPerSecond)
+
+			located_spaceships = []
+			if scan:
+				located_spaceships = self.handle_pilot_scan(spaceship, scan)
+
+			action = spaceship.update(self.gameTicks, self.ticksPerSecond, located_spaceships)
 			self.handle_pilot_action(spaceship, action)
 			# except Exception as e:
 			# 	print(str(e.__traceback__))
@@ -62,76 +68,52 @@ class GameHandler:
 	def handle_pilot_action(self, spaceship: BoxSpaceship, action: PilotAction):
 		if not action:
 			return
-		if action.scan_action:
-			if self.handle_pilot_scan(spaceship, action.scan_action, action):
-				return
-		if action.move_action:
-			self.handle_pilot_move(spaceship, action.move_action)
-		if action.shoot_action:
-			self.handle_pilot_shoot(spaceship, action.shoot_action)
+		if action.acceleration is not None:
+			self.handle_pilot_move(spaceship, action.acceleration)
+		if action.shootAngle:
+			self.handle_pilot_shoot(spaceship, action.shootAngle)
 
-	def handle_pilot_scan(self, spaceship: BoxSpaceship, scan: dict, action: PilotAction):
-		energy_cost = scanning.calculate_scan_energy_cost(scan.get("angle"), scan.get("radius"))
+	def handle_pilot_scan(self, spaceship: BoxSpaceship, scan: ScanAction):
+		energy_cost = scanning.calculate_scan_energy_cost(scan.angle, scan.distance)
 
 		if energy_cost > spaceship.energy:
-			return False
-			# raise ValueError("Not enough energy to perform scan.")
+			return []
+		# raise ValueError("Not enough energy to perform scan.")
 		spaceship.use_energy(energy_cost)
 
 		located_rockets = scanning.calculate_located_rockets(
 			spaceship.get_location(self.ticksPerSecond),
-			scan.get("radius"),
-			scan.get("direction"),
-			scan.get("angle"),
-			[other.get_location(self.ticksPerSecond) for other in self.contactHandler.spaceships if other != spaceship])
+			scan.direction,
+			scan.distance,
+			scan.angle,
+			[other.get_location().position for other in self.contactHandler.spaceships if other != spaceship])
 
 		if located_rockets:
 			self.contactHandler.add_scan(BoxScan(
 				spaceship.get_location(self.ticksPerSecond).get_position(),
-				scan.get("radius"),
-				scan.get("direction"),
-				scan.get("angle"),
-				self.scanSuccessColor))
-		else:
-			self.contactHandler.add_scan(BoxScan(
-				spaceship.get_location(self.ticksPerSecond).get_position(),
-				scan.get("radius"),
-				scan.get("direction"),
-				scan.get("angle")))
+				scan.direction,
+				scan.distance,
+				scan.angle,
+				self.scanSuccessColor if located_rockets else self.scanFailColor))
+		return located_rockets
 
-		self.process_scan(spaceship, action, located_rockets)
-		return True
-
-	def process_scan(self, spaceship: BoxSpaceship, action: PilotAction, located_rockets: List[Location]):
-		# try:
-		action = spaceship.process_scan(action, located_rockets)
-		if not action:
-			return
-
-		# except Exception as e:
-		# 	print(str(e))
-		# 	return
-		# make sure no second scan is possible after first scan
-		action.scan_action = None
-		self.handle_pilot_action(spaceship, action)
-
-	def handle_pilot_move(self, spaceship: BoxSpaceship, move: dict):
-		power = max(0, min(self.maxSpaceshipSpeedPerTick, move.get("power")))
+	def handle_pilot_move(self, spaceship: BoxSpaceship, acceleration: np.ndarray):
+		power = min(self.maxSpaceshipSpeedPerTick, np.linalg.norm(acceleration))
 		energy_cost = power * self.accCostPerMeterSecondSq
 
 		if energy_cost > spaceship.energy:
 			return
 		spaceship.use_energy(energy_cost)
-		force = angle2vec(move.get("direction")) * (move.get("power"))
-		spaceship.move(force, self.maxSpaceshipSpeedPerTick, self.ticksPerSecond)
+		b2acc = b2Vec2(acceleration[0], acceleration[1])
+		spaceship.move(b2acc, self.maxSpaceshipSpeedPerTick, self.ticksPerSecond)
 
-	def handle_pilot_shoot(self, spaceship: BoxSpaceship, shoot: dict):
+	def handle_pilot_shoot(self, spaceship: BoxSpaceship, shoot_angle: float):
 		if self.rocketCost > spaceship.energy:
 			return
 		spaceship.use_energy(self.rocketCost)
-		direction = angle2vec(shoot.get("angle")) * self.rocketSpeed
+		direction = angle_to_b2vec(shoot_angle) * self.rocketSpeed
 		self.contactHandler.add_rocket(BoxRocket(self.world, spaceship, direction))
 
 
-def angle2vec(angle: float) -> b2Vec2:
+def angle_to_b2vec(angle: float) -> b2Vec2:
 	return b2Vec2(math.cos(angle), math.sin(angle))
