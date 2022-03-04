@@ -4,6 +4,7 @@ from typing import List
 import pyglet
 from Box2D import b2Vec2
 
+from bots import afkBot, circleBot
 from game.boxBackground import BoxBackground
 from game.boxBorder import BoxBorder
 from game.boxContactListener import BoxContactListener
@@ -24,13 +25,15 @@ class GameSimulation(PygletFramework):
 
 		self.background = BoxBackground(self.gameSize, self.settings.hz)
 		self.gui = None
-		self.isSimulationRunning = False
+		self.arePhysicsOn = False
+		self.isGameOver = True
 
 		self.frameCount = 0
+		self.gameTicksPerSecond = 5
 
 		self.contactHandler = BoxContactListener(self.world)
 		self.world.contactListener = self.contactHandler
-		self.gameHandler = GameHandler(self.world, self.contactHandler, self.gameSize)
+		self.gameHandler = GameHandler(self.world, self.contactHandler, self.gameSize, self.gameTicksPerSecond)
 		self._create_game_field()
 
 		self.startMenu = StartMenu(self.window, lambda: self.start_simulation(self.startMenu.get_selected_pilot_classes()))
@@ -38,10 +41,9 @@ class GameSimulation(PygletFramework):
 		self._return_to_start()
 
 	def _return_to_start(self):
-		self.isSimulationRunning = False
+		self.arePhysicsOn = False
 		self.contactHandler.reset()
 
-		# remove any previous gui from window events
 		if self.gui:
 			self.gui.hide()
 
@@ -56,20 +58,25 @@ class GameSimulation(PygletFramework):
 			self.gameHandler.spawn_spaceship(pilot(self.gameSize, self.spaceshipSize))
 
 		self.stepCount = 0
-		self.isSimulationRunning = True
+		self.arePhysicsOn = True
+		self.isGameOver = False
 
 	def pause_simulation(self):
-		self.isSimulationRunning = False
+		self.arePhysicsOn = False
+		self.isGameOver = True
 
-	def announce_result(self):
+	def _announce_result(self):
+		self.isGameOver = True
 		self.gui = self.gamOverMenu
 		self.gamOverMenu.unhide()
 
 		if len(self.contactHandler.spaceships) > 0:
 			self.gamOverMenu.set_winner(next(iter(self.contactHandler.spaceships)).name)
+		else:
+			self.gamOverMenu.set_tie()
 
 	def display(self, dt):
-		if self.isSimulationRunning:
+		if self.arePhysicsOn:
 			self.SimulationLoop(1 / self.settings.hz)
 
 		# don't draw shapes and texts on same layer :P
@@ -98,10 +105,12 @@ class GameSimulation(PygletFramework):
 
 	def Step(self):
 		super().Step()
-		if len(self.contactHandler.spaceships) < 2:
-			self.announce_result()
-			return
 
+		if self.isGameOver:
+			return
+		if len(self.contactHandler.spaceships) < 2:
+			self._announce_result()
+			return
 		if self.stepCount % (self.settings.hz // 5) == 0:
 			self.gameHandler.update()
 		self.contactHandler.remove_bodies()

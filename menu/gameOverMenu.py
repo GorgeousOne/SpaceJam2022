@@ -14,6 +14,7 @@ class GameOverMenu:
 
 	def _setup_gui(self):
 		self.gui = MenuGui(self.window)
+		self.gui.name = "a"
 
 		root = glooey.VBox()
 		root.set_default_cell_size(1)
@@ -31,17 +32,21 @@ class GameOverMenu:
 
 		root.add(self.readyButton)
 		self.gui.add(root)
-		self.gui.hide()
+		self.hide()
 
 	def set_winner(self, winner: str):
 		self.resultTitle.set_text(winner + " won!")
 
+	def set_tie(self):
+		self.resultTitle.set_text("It's a tie...")
+
 	def unhide(self):
+		self.window.push_handlers(self.gui)
 		self.gui.unhide()
 
 	def hide(self):
-		self.resultTitle.set_text("It's a tie...")
 		self.gui.hide()
+		self.window.remove_handlers(self.gui)
 
 	def display(self):
 		gl.glPushMatrix()

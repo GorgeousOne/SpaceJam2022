@@ -2,13 +2,14 @@ import os
 import pkgutil
 
 import glooey
+import pyglet
 from pyglet import gl
 from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
 
-import pilots.afkBot
-import pilots.circleBot
-from menu.menuWidget import CustomButton, ScrollList, MenuGui, Title
+from bots import afkBot, circleBot, batman, testBot
+
+from menu.menuWidget import CustomButton, ScrollList, MenuGui, Title, MenuLabel
 from render.pygletWindow import PygletWindow
 from util import fileLoad
 
@@ -24,6 +25,11 @@ class StartMenu:
 
 		self.pilotClasses = {}
 		self._setup_gui()
+
+		# manually evaluated
+		self.max_label_width = 140
+		self._load_default_pilots()
+		self._load_user_pilots()
 		# self._setup_watchdog()
 
 	def _setup_gui(self):
@@ -32,7 +38,7 @@ class StartMenu:
 		root = glooey.VBox()
 		root.set_default_cell_size(1)
 		root.set_cell_padding(20)
-		root.set_top_padding(20)
+		root.set_padding(20)
 		root.set_alignment("top")
 
 		game_title = Title("Space Jam", font_size=24)
@@ -48,9 +54,6 @@ class StartMenu:
 		table_container.add(self.availablePilotsBox)
 		table_container.add(self.selectedPilotsBox)
 
-		self._load_default_pilots()
-		self._load_user_pilots()
-
 		self.readyButton = CustomButton("Not Ready", lambda widget: self.gameStartCallback())
 		self.readyButton.set_size_hint(200, 0)
 		self.readyButton.set_alignment("center")
@@ -59,7 +62,7 @@ class StartMenu:
 		self.readyButton.disable()
 		root.add(self.readyButton)
 		self.gui.add(root)
-		self.gui.hide()
+		self.hide()
 
 	def _setup_watchdog(self):
 		patterns = ["*.py"]
@@ -85,10 +88,12 @@ class StartMenu:
 		return selected_pilots
 
 	def unhide(self):
+		self.window.push_handlers(self.gui)
 		self.gui.unhide()
 
 	def hide(self):
 		self.gui.hide()
+		self.window.remove_handlers(self.gui)
 
 	def display(self):
 		gl.glPushMatrix()
@@ -97,10 +102,20 @@ class StartMenu:
 		gl.glPopMatrix()
 
 	def _add_available_pilot(self, pilot_class):
-		name = pilot_class.__name__
+		name = self.trim_string(pilot_class.__name__, self.max_label_width, MenuLabel.custom_font_name, MenuLabel.custom_font_size)
 		self.pilotClasses[name] = pilot_class
 		self.availablePilotsBox.add_elem(CustomButton(name, self._select_pilot))
 		self.availablePilotsCount += 1
+
+	def trim_string(self, string: str, max_width: int, font_name: str, font__size: int = 10):
+		substring = string
+		while len(substring) > 0:
+			label = pyglet.text.Label(substring)
+			if label.content_width > max_width:
+				substring = substring[:-1]
+			else:
+				return substring
+		return ""
 
 	def _select_pilot(self, button: CustomButton):
 		if self.selectedPilotsCount >= 8:
@@ -122,8 +137,10 @@ class StartMenu:
 			self.readyButton.disable()
 
 	def _load_default_pilots(self):
-		self._add_available_pilot(pilots.afkBot.AfkBot)
-		self._add_available_pilot(pilots.circleBot.CircleBot)
+		self._add_available_pilot(afkBot.AfkBot)
+		self._add_available_pilot(circleBot.CircleBot)
+		self._add_available_pilot(testBot.TestBot)
+		self._add_available_pilot(batman.Batman)
 
 	# can't get it to work with pyinstaller
 	# pkg_path = fileLoad.resource_path(pilots.__name__)

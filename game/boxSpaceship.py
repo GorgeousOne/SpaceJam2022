@@ -6,7 +6,7 @@ from Box2D import (b2World, b2PolygonShape, b2FixtureDef, b2Color, b2Vec2)
 
 from render.pygletDraw import PygletDraw
 from logic.location import Location
-from logic.pilotAction import PilotAction
+from logic.pilotAction import PilotAction, ScanAction
 from logic.spaceshipPilot import SpaceshipPilot
 
 hitbox = [
@@ -64,12 +64,15 @@ viewbox = [b2Vec2(v[0], v[1]) for v in viewbox]
 
 class BoxSpaceship:
 
-	def __init__(self, world: b2World, pilot: SpaceshipPilot, health: int, color: b2Color = b2Color(1., 1., 1.), pos: b2Vec2 = b2Vec2(0, 0), angle: float = 0):
+	def __init__(self, world: b2World, pilot: SpaceshipPilot, max_health: int, max_energy: float, color: b2Color = b2Color(1., 1., 1.), pos: b2Vec2 = b2Vec2(0, 0), angle: float = 0):
 		self.pilot = pilot
 		self.name = type(pilot).__name__
-		self.max_health = health
-		self.health = health
-		self.energy = 0
+		self.displayName = self.name[0:16] if len(self.name) > 16 else self.name
+
+		self.max_health = max_health
+		self.health = max_health
+		self.max_energy = max_energy
+		self.energy = max_energy
 
 		self.color = b2Color(color)
 		self.shape = b2PolygonShape(vertices=hitbox)
@@ -85,15 +88,26 @@ class BoxSpaceship:
 			fixedRotation=True  # fixes angular velocity to one value
 		)
 
-	def update(self, new_energy) -> PilotAction:
-		self.energy = new_energy
-		return self.pilot.update(self.get_location(), self.health, self.energy)
+	def add_energy(self, energy_amount: int):
+		self.energy = min(self.max_energy, self.energy + energy_amount)
 
-	def process_scan(self, current_action: PilotAction, located_rockets: List[Location]) -> PilotAction:
-		return self.pilot.process_scan(current_action, located_rockets)
+	def use_energy(self, energy_amount: float):
+		self.energy = max(0, self.energy - energy_amount)
 
-	def move(self, impulse: b2Vec2):
-		self.body.linearVelocity += impulse
+	def prepare_scan(self, game_tick: int, ticks_per_second: int) -> ScanAction:
+		return self.pilot.prepare_scan(game_tick, self.get_location(ticks_per_second), self.health, self.energy)
+
+	def update(self, game_tick: int, ticks_per_second: int, located_rockets: List[np.ndarray]) -> PilotAction:
+		return self.pilot.update(game_tick, self.get_location(ticks_per_second), self.health, self.energy, located_rockets)
+
+	def move(self, acceleration: b2Vec2, max_velocity_per_tick, ticks_per_second):
+		self.body.linearVelocity += acceleration * ticks_per_second
+		current_velocity = self.body.linearVelocity.length
+
+		max_velocity = max_velocity_per_tick * ticks_per_second
+		if current_velocity > max_velocity:
+			self.body.linearVelocity *= max_velocity / current_velocity
+
 		if self.body.linearVelocity.y != 0 or self.body.linearVelocity.x != 0:
 			self.body.angle = math.atan2(self.body.linearVelocity.y, self.body.linearVelocity.x)
 
@@ -102,9 +116,9 @@ class BoxSpaceship:
 		if self.health <= 0:
 			self.color = b2Color(255, 0, 0)
 
-	def get_location(self):
+	def get_location(self, ticks_per_second:int = 1):
 		pos = self.body.position
-		vel = self.body.linearVelocity
+		vel = self.body.linearVelocity / ticks_per_second
 		return Location(np.array([pos.x, pos.y]), np.array([vel.x, vel.y]))
 
 	def display(self, renderer: PygletDraw, layer_index: int, text_layer_index: int):
@@ -115,30 +129,36 @@ class BoxSpaceship:
 		renderer.DrawIndexedTriangles(layer_index, vertices, triangle_indices, self.color)
 
 		pos = b2Vec2(self.body.position) + b2Vec2(0, 7)
-		renderer.DrawText(text_layer_index, self.name, pos, "GravityRegular5", 8)
+		renderer.DrawText(text_layer_index, self.displayName, pos, "GravityRegular5", 8)
 
-		damaged_color = b2Color(1, 1, 1)
-		damaged_color.a = 0.2
-		self.display_healthbar(renderer, b2Color(1, 1, 1), damaged_color)
+		self.display_bar(renderer, layer_index, self.health/self.max_health, 5.0, b2Color(0.9, 0.0, 0.0))
+		self.display_bar(renderer, layer_index, self.energy/self.max_energy, 4.0, b2Color(0.1, 0.25, 1.0))
 
-	def display_healthbar(self, renderer: PygletDraw, healthy_color, damaged_color):
-		width = 10
-		height = 0.6
-		border = (float(self.health) / self.max_health - 0.5) * width
-		offset = 4
+	def display_bar(self, renderer: PygletDraw, layer_index: int, percent: float, offset: float, color: b2Color = b2Color(1.0, 1.0, 1.0), width: float = 10, height: float = 0.6):
+		color_missing = b2Color(color)
+		color_missing.a = 0.5
 
-		pos = b2Vec2(self.body.position)
-		healthy_verts = [
-			b2Vec2(pos) + b2Vec2(-width/2, offset + height),
-			b2Vec2(pos) + b2Vec2(border, offset + height),
-			b2Vec2(pos) + b2Vec2(border, offset),
-			b2Vec2(pos) + b2Vec2(-width/2, offset),
-		]
-		damaged_verts = [
-			b2Vec2(pos) + b2Vec2(border, offset + height),
-			b2Vec2(pos) + b2Vec2(width / 2, offset + height),
-			b2Vec2(pos) + b2Vec2(width / 2, offset),
-			b2Vec2(pos) + b2Vec2(border, offset),
-		]
-		renderer.DrawGradientRect(7, healthy_verts, healthy_color, healthy_color)
-		renderer.DrawGradientRect(7, damaged_verts, damaged_color, damaged_color)
+		pos = self.body.position
+		x_min = pos.x - width/2
+		x_max = x_min + width
+		x_mid = x_min + percent * width
+
+		y_min = pos.y + offset
+		y_max = y_min + height
+
+		if percent > 0:
+			remaining_verts = [
+				b2Vec2(x_min, y_min),
+				b2Vec2(x_min, y_max),
+				b2Vec2(x_mid, y_max),
+				b2Vec2(x_mid, y_min),
+			]
+			renderer.DrawGradientRect(layer_index, remaining_verts, color, color)
+		if percent < 1:
+			missing_verts = [
+				b2Vec2(x_mid, y_min),
+				b2Vec2(x_mid, y_max),
+				b2Vec2(x_max, y_max),
+				b2Vec2(x_max, y_min),
+			]
+			renderer.DrawGradientRect(layer_index, missing_verts, color_missing, color_missing)
