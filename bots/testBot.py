@@ -1,8 +1,6 @@
 import math
 import random
 
-import numpy as np
-
 from logic.location import Location
 from logic.pilotAction import PilotAction
 from logic.spaceshipPilot import SpaceshipPilot

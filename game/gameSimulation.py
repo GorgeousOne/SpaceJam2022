@@ -1,22 +1,21 @@
-import math
 from typing import List
 
 import pyglet
 from Box2D import b2Vec2
+from pyglet.window import key
 
-from bots import afkBot, circleBot
 from game.boxBackground import BoxBackground
 from game.boxBorder import BoxBorder
 from game.boxContactListener import BoxContactListener
-from game.boxRocket import BoxRocket
 from game.gameHandler import GameHandler
-from menu.startMenu import StartMenu
-from menu.gameOverMenu import GameOverMenu
+from menu.gameOverMenu import GameOverGameMenu
+from menu.gameMenu import GameMenu
+from menu.pauseMenu import PauseGameMenu
+from menu.startMenu import StartGameMenu
 from render.pygletFramework import PygletFramework
 
 
 class GameSimulation(PygletFramework):
-	name = "Space Jam"
 
 	def __init__(self, window: pyglet.window.Window):
 		super(GameSimulation, self).__init__(window)
@@ -25,8 +24,11 @@ class GameSimulation(PygletFramework):
 
 		self.background = BoxBackground(self.gameSize, self.settings.hz)
 		self.gui = None
+
 		self.arePhysicsOn = False
 		self.isGameOver = True
+		self.isGamePaused = False
+		self.doDisplayNames = True
 
 		self.frameCount = 0
 		self.gameTicksPerSecond = 5
@@ -36,24 +38,29 @@ class GameSimulation(PygletFramework):
 		self.gameHandler = GameHandler(self.world, self.contactHandler, self.gameSize, self.gameTicksPerSecond)
 		self._create_game_field()
 
-		self.startMenu = StartMenu(self.window, lambda: self.start_simulation(self.startMenu.get_selected_pilot_classes()))
-		self.gamOverMenu = GameOverMenu(self.window, self._return_to_start)
+		self.startMenu = StartGameMenu(self.window, lambda: self.start_simulation(self.startMenu.get_selected_pilot_classes()))
+		self.gamOverMenu = GameOverGameMenu(self.window, self._return_to_start)
+		self.pauseMenu = PauseGameMenu(self.window, self.continue_game, self._return_to_start)
 		self._return_to_start()
 
-	def _return_to_start(self):
-		self.arePhysicsOn = False
-		self.contactHandler.reset()
+	def _show_gui(self, gui: GameMenu):
+		self._hide_gui()
+		self.gui = gui
+		self.gui.unhide()
 
-		if self.gui:
-			self.gui.hide()
-
-		self.gui = self.startMenu
-		self.startMenu.unhide()
-
-	def start_simulation(self, pilot_classes: List):
+	def _hide_gui(self):
 		if self.gui:
 			self.gui.hide()
 			self.gui = None
+
+	def _return_to_start(self):
+		self.isGamePaused = False
+		self.arePhysicsOn = False
+		self.contactHandler.reset()
+		self._show_gui(self.startMenu)
+
+	def start_simulation(self, pilot_classes: List):
+		self._hide_gui()
 		for pilot in pilot_classes:
 			self.gameHandler.spawn_spaceship(pilot(self.gameSize, self.spaceshipSize))
 
@@ -61,14 +68,19 @@ class GameSimulation(PygletFramework):
 		self.arePhysicsOn = True
 		self.isGameOver = False
 
-	def pause_simulation(self):
-		self.arePhysicsOn = False
-		self.isGameOver = True
+	def pause_game(self):
+		self.isGamePaused = True
+		self._show_gui(self.pauseMenu)
+
+	def continue_game(self):
+		if not self.isGamePaused:
+			return
+		self.isGamePaused = False
+		self._hide_gui()
 
 	def _announce_result(self):
 		self.isGameOver = True
-		self.gui = self.gamOverMenu
-		self.gamOverMenu.unhide()
+		self._show_gui(self.gamOverMenu)
 
 		if len(self.contactHandler.spaceships) > 0:
 			self.gamOverMenu.set_winner(next(iter(self.contactHandler.spaceships)).name)
@@ -93,7 +105,7 @@ class GameSimulation(PygletFramework):
 
 		text_layer = 4
 		for ship in self.contactHandler.spaceships:
-			ship.display(self.renderer, 2, text_layer)
+			ship.display(self.renderer, 2, text_layer if self.doDisplayNames else None)
 			text_layer += 1
 
 		self.border.display(self.renderer, 3)
@@ -104,6 +116,9 @@ class GameSimulation(PygletFramework):
 		self.frameCount += 1
 
 	def Step(self):
+		if self.isGamePaused:
+			return
+
 		super().Step()
 
 		if self.isGameOver:
@@ -122,3 +137,15 @@ class GameSimulation(PygletFramework):
 		self.renderer.setZoom((self.gameSize + 4 * self.border.thickness) / 2)
 		self.renderer.setCenter(b2Vec2(self.gameSize / 2, self.gameSize / 2))
 
+	def Keyboard(self, pressed):
+		if pressed == key.SPACE: # Spacebar
+			if not self.arePhysicsOn or self.isGameOver:
+				return
+
+			if self.isGamePaused:
+				self.continue_game()
+			else:
+				self.pause_game()
+
+		elif pressed == key.F1:
+			self.doDisplayNames = not self.doDisplayNames

@@ -1,0 +1,4 @@
+windows:
+pyinstaller.exe --onefile ../spaceJam.py --add-binary="../res/GravityBold8.ttf;res" --add-binary="../res/GravityRegular5.ttf;res" --add-binary="../res/rocket-icon.png;res"
+linux?
+pyinstaller --onefile ../spaceJam.py --add-binary="../res/GravityBold8.ttf;res" --add-binary="../res/GravityRegular5.ttf;res" --add-binary="../res/rocket-icon.png;res"

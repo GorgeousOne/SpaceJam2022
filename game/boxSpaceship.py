@@ -127,10 +127,10 @@ class BoxSpaceship:
 		for v in viewbox:
 			vertices.append(self.body.GetWorldPoint(v))
 		renderer.DrawIndexedTriangles(layer_index, vertices, triangle_indices, self.color)
-
 		pos = b2Vec2(self.body.position) + b2Vec2(0, 7)
-		renderer.DrawText(text_layer_index, self.displayName, pos, "GravityRegular5", 8)
 
+		if text_layer_index:
+			renderer.DrawText(text_layer_index, self.displayName, pos, "GravityRegular5", 8)
 		self.display_bar(renderer, layer_index, self.health/self.max_health, 5.0, b2Color(0.9, 0.0, 0.0))
 		self.display_bar(renderer, layer_index, self.energy/self.max_energy, 4.0, b2Color(0.1, 0.25, 1.0))
 

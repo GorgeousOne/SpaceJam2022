@@ -23,6 +23,7 @@ class GameHandler:
 		self.ticksPerSecond = ticks_per_second
 
 		self.spaceshipHealth = 100
+		self.spaceshipMaxEnergy = 100
 
 		self.maxSpaceshipSpeedPerTick = 5
 		# TODO find good value for energy per tick
@@ -46,7 +47,14 @@ class GameHandler:
 			self.gameSize / 2 + math.sin(angle) * distance)
 
 		ship_color = colorParse.rgb_to_b2color(colorParse.hex_to_rgb(pilot.shipColor))
-		self.contactHandler.add_spaceship(BoxSpaceship(self.world, pilot, 60, 100, ship_color, pos, random.uniform(-math.pi, math.pi)))
+		self.contactHandler.add_spaceship(BoxSpaceship(
+			self.world,
+			pilot,
+			self.spaceshipHealth,
+			self.spaceshipMaxEnergy,
+			ship_color,
+			pos,
+			random.uniform(-math.pi, math.pi)))
 
 	def update(self):
 		for spaceship in self.contactHandler.spaceships:
