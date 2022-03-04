@@ -54,8 +54,9 @@ class GameSimulation(PygletFramework):
 			self.gui = None
 
 	def _return_to_start(self):
-		self.isGamePaused = False
 		self.arePhysicsOn = False
+		self.isGameOver = True
+		self.isGamePaused = False
 		self.contactHandler.reset()
 		self._show_gui(self.startMenu)
 
@@ -118,7 +119,6 @@ class GameSimulation(PygletFramework):
 	def Step(self):
 		if self.isGamePaused:
 			return
-
 		super().Step()
 
 		if self.isGameOver:
@@ -138,14 +138,15 @@ class GameSimulation(PygletFramework):
 		self.renderer.setCenter(b2Vec2(self.gameSize / 2, self.gameSize / 2))
 
 	def Keyboard(self, pressed):
-		if pressed == key.SPACE: # Spacebar
-			if not self.arePhysicsOn or self.isGameOver:
-				return
-
-			if self.isGamePaused:
-				self.continue_game()
-			else:
-				self.pause_game()
-
+		if pressed == key.BACKSPACE:
+			self._return_to_start()
+		elif pressed == key.SPACE:
+			if self.isGameOver:
+				self._return_to_start()
+			elif self.arePhysicsOn:
+				if self.isGamePaused:
+					self.continue_game()
+				else:
+					self.pause_game()
 		elif pressed == key.F1:
 			self.doDisplayNames = not self.doDisplayNames

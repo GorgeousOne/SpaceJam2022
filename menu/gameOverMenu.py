@@ -18,7 +18,7 @@ class GameOverGameMenu(GameMenu):
 		container = glooey.VBox()
 		container.set_default_cell_size(1)
 		container.set_cell_padding(40)
-		container.set_bottom_padding(60)
+		container.set_bottom_padding(50)
 		container.set_alignment("center")
 
 		self.resultTitle = Title("", font_size=24)

@@ -112,9 +112,7 @@ class BoxSpaceship:
 			self.body.angle = math.atan2(self.body.linearVelocity.y, self.body.linearVelocity.x)
 
 	def damage(self, amount: int):
-		self.health -= amount
-		if self.health <= 0:
-			self.color = b2Color(255, 0, 0)
+		self.health = max(0, self.health - amount)
 
 	def get_location(self, ticks_per_second:int = 1):
 		pos = self.body.position

@@ -50,15 +50,15 @@ class BoxContactListener(b2ContactListener):
 		if isinstance(other, BoxSpaceship):
 			# prevents rockets from damaging own spaceship
 			if rocket.shooter != other:
-				self._handle_spaceship_damage(other)
+				self.damage_spaceship(other, 20)
 			else:
 				return
 		self._bodies_to_remove.add(rocket.body)
 		self.rockets.discard(rocket)
 		self.explosions.add(BoxExplosion(rocket.body.position, 3, 1, rocket.color))
 
-	def _handle_spaceship_damage(self, spaceship):
-		spaceship.damage(20)
+	def damage_spaceship(self, spaceship, damage: float):
+		spaceship.damage(damage)
 		if spaceship.health <= 0:
 			self._bodies_to_remove.add(spaceship.body)
 			self.spaceships.discard(spaceship)
