@@ -31,4 +31,4 @@ def load_class_by_module_name(module_path):
 	try:
 		return getattr(module, class_name)
 	except AttributeError:
-		raise ValueError("Could not locate class " + class_name + " in module " + module_path)
+		raise ValueError("Could not find a class \"" + class_name + "\" in module \"" + module_path + "\".")

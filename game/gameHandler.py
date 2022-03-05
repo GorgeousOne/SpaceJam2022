@@ -23,16 +23,19 @@ class GameHandler:
 		self.ticksPerSecond = ticks_per_second
 
 		self.spaceshipHealth = 100
+		self.spaceshipMaxEnergy = 100
 
 		self.maxSpaceshipSpeedPerTick = 5
-		# TODO find good value for energy per tick
 		self.energyPerTick = 10
+
+		self.timePenaltyStart = 10 * self.ticksPerSecond
+		self.timPenaltyDmg = 1
 
 		self.rocketSpeed = 25
 		self.scanSuccessColor = b2Color(1, .2, .2)
 		self.scanFailColor = b2Color(1, 1, 1)
 		self.spaceshipSpawnRange = self.gameSize * 0.4
-		self.gameTicks = 0
+		self.gameTick = 0
 
 		self.rocketCost = 50
 		self.accCostPerMeterSecondSq = 1
@@ -46,24 +49,35 @@ class GameHandler:
 			self.gameSize / 2 + math.sin(angle) * distance)
 
 		ship_color = colorParse.rgb_to_b2color(colorParse.hex_to_rgb(pilot.shipColor))
-		self.contactHandler.add_spaceship(BoxSpaceship(self.world, pilot, 60, 100, ship_color, pos, random.uniform(-math.pi, math.pi)))
+		self.contactHandler.add_spaceship(BoxSpaceship(
+			self.world,
+			pilot,
+			self.spaceshipHealth,
+			self.spaceshipMaxEnergy,
+			ship_color,
+			pos,
+			random.uniform(-math.pi, math.pi)))
 
 	def update(self):
+		if self.gameTick > self.timePenaltyStart:
+			for spaceship in list(self.contactHandler.spaceships):
+				self.contactHandler.damage_spaceship(spaceship, self.timPenaltyDmg)
+
 		for spaceship in self.contactHandler.spaceships:
 			spaceship.add_energy(self.energyPerTick)
 			# try:
-			scan = spaceship.prepare_scan(self.gameTicks, self.ticksPerSecond)
+			scan = spaceship.prepare_scan(self.gameTick, self.ticksPerSecond)
 
 			located_spaceships = []
 			if scan:
 				located_spaceships = self.handle_pilot_scan(spaceship, scan)
 
-			action = spaceship.update(self.gameTicks, self.ticksPerSecond, located_spaceships)
+			action = spaceship.update(self.gameTick, self.ticksPerSecond, located_spaceships)
 			self.handle_pilot_action(spaceship, action)
 			# except Exception as e:
 			# 	print(str(e.__traceback__))
 			# 	continue
-		self.gameTicks += 1
+		self.gameTick += 1
 
 	def handle_pilot_action(self, spaceship: BoxSpaceship, action: PilotAction):
 		if not action:

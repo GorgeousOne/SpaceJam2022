@@ -3,8 +3,6 @@ import os
 import pyglet
 
 from game.boxBackground import BoxBackground
-from menu.startMenu import StartMenu
-from menu.gameOverMenu import GameOverMenu
 from game.gameSimulation import GameSimulation
 from render.settings import fwSettings
 

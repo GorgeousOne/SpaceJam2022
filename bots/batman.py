@@ -1,8 +1,5 @@
 import math
 import random
-from typing import List
-
-import numpy as np
 
 from logic.location import Location
 from logic.pilotAction import PilotAction
@@ -12,7 +9,7 @@ from logic.spaceshipPilot import SpaceshipPilot
 class Batman(SpaceshipPilot):
 
 	def __init__(self, game_width = 0, spaceship_size = 0):
-		super().__init__(game_width, spaceship_size, "#060606")
+		super().__init__(game_width, spaceship_size, "#0A0A0A")
 		self.gameTick = 0
 		self.angle = random.random() * math.pi * 2
 		self.isStart = True

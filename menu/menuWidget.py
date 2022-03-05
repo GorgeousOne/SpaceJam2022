@@ -27,8 +27,8 @@ class ScrollList(glooey.VBox):
 		super().__init__()
 		self.header = Title(name)
 		self.table = VScrollBox()
-
 		self.table.set_height_hint(360)
+
 		self.tableContents = glooey.VBox()
 		self.tableContents.set_cell_padding(10)
 		self.tableContents.set_default_cell_size(1)
@@ -36,6 +36,12 @@ class ScrollList(glooey.VBox):
 		self.add(self.header)
 		self.add(self.table)
 		self.table.add(self.tableContents)
+
+	def __len__(self):
+		return len(self.tableContents.get_children())
+
+	def clear(self):
+		self.tableContents.clear()
 
 	def add_elem(self, elem: glooey.Widget):
 		self.tableContents.add(elem)
