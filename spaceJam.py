@@ -39,7 +39,7 @@ class SpaceJam:
 		self.gameSize = 100
 
 		# https://jotson.itch.io/gravity-pixel-font
-		self.load_font("GravityBold8.ttf")
+		self.load_font("GravityRobotBold8.ttf")
 		self.load_font("GravityRegular5.ttf")
 
 		self.background = BoxBackground(self.gameSize, fwSettings.hz)
