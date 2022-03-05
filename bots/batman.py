@@ -1,8 +1,5 @@
 import math
 import random
-from typing import List
-
-import numpy as np
 
 from logic.location import Location
 from logic.pilotAction import PilotAction
