@@ -10,12 +10,11 @@ EPSILON = 0.0001
 def wrap_to_pi(rad_angle):
 	return (rad_angle + math.pi) % (2 * math.pi) - math.pi
 
-def calc_scan_energy_cost(direction: float, radius: float) -> float:
-	return radius * direction
+def calc_scan_energy_cost(angle: float, distance: float) -> float:
+	return distance * distance * angle / 2
 
-
-def calc_located_spaceships(scan_center: Location, radius: float, direction: float, angle: float, targets: List[Location]) -> List[Location]:
-	return list(filter(lambda loc: is_loc_in_scan(loc, scan_center, radius, direction, angle), targets))
+def calc_located_spaceships(scan_center: Location, distance: float, direction: float, angle: float, targets: List[Location]) -> List[Location]:
+	return list(filter(lambda loc: is_loc_in_scan(loc, scan_center, distance, direction, angle), targets))
 
 
 def is_loc_in_scan(loc: Location, scan_center: Location, radius: float, direction: float, angle: float) -> bool:

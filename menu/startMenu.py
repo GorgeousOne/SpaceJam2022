@@ -6,7 +6,7 @@ import pyglet
 from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
 
-from bots import afk, orbiter, batman, creeper
+from bots import testdummy, orbiter, batman, creeper, explorer
 from menu.gameMenu import GameMenu
 
 from menu.menuWidget import CustomButton, ScrollList, Title, MenuLabel
@@ -122,9 +122,10 @@ class StartGameMenu(GameMenu):
 		self._load_user_pilots()
 
 	def _load_default_pilots(self):
-		self._add_available_pilot(afk.Afk, True)
+		self._add_available_pilot(testdummy.TestDummy, True)
 		self._add_available_pilot(orbiter.Orbiter, True)
 		self._add_available_pilot(creeper.Creeper, True)
+		self._add_available_pilot(explorer.Explorer, True)
 		self._add_available_pilot(batman.Batman, True)
 
 	# can't get it to work with pyinstaller

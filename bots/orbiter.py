@@ -1,6 +1,4 @@
 import math
-from typing import List
-
 import numpy as np
 
 from logic import spaceshipPilot as pilot
@@ -15,7 +13,7 @@ class Orbiter(SpaceshipPilot):
 		super().__init__(game_width, spaceship_size, "#2D82F0")
 		self.center = np.array([self.gameWidth / 2, self.gameWidth / 2])
 		self.speed = 3
-		self.radius = 30
+		self.radius = 20
 		self.angleStep = self.speed / self.radius
 		self.startAngle = 0
 
@@ -43,14 +41,15 @@ class Orbiter(SpaceshipPilot):
 		target = self.center + np.array([np.cos(angle), np.sin(angle)]) * self.radius
 		vel = current_location.get_velocity()
 		acc = target - (pos + vel)
-		power = np.linalg.norm(acc)
 
-		if power > self.speed:
-			acc = acc * self.speed / power
+		total = vel + acc
+		power = pilot.get_vec_length(total)
+		if power > self.speed + 1:
+			total = total * self.speed / power
+			acc = total - vel
 		action.move_spaceship_with_vec(acc)
 
-		if game_tick % 5 == 0:
+		if game_tick % 10 == 0:
 			center_dir = pilot.get_angle_of_vec(self.center - pos)
 			action.shoot_rocket(center_dir - math.pi / 2)
-
 		return action

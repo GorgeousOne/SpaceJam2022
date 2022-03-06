@@ -25,7 +25,7 @@ class GameHandler:
 		self.spaceshipHealth = 100
 		self.spaceshipMaxEnergy = 100
 
-		self.maxSpaceshipSpeedPerTick = 5
+		self.maxSpaceshipSpeedPerTick = 10
 		self.energyPerTick = 10
 
 		self.timePenaltyStart = 15 * self.ticksPerSecond
@@ -38,7 +38,7 @@ class GameHandler:
 		self.gameTick = 0
 
 		self.rocketCost = 50
-		self.accCostPerMeterSecondSq = 1
+		self.accCostPerMeterSecondSq = 10
 		self.scanCostPerMeterSq = 1
 
 	def reset(self):
@@ -51,7 +51,10 @@ class GameHandler:
 			self.gameSize / 2 + math.cos(angle) * distance,
 			self.gameSize / 2 + math.sin(angle) * distance)
 
-		ship_color = colorParse.rgb_to_b2color(colorParse.hex_to_rgb(pilot.shipColor))
+		ship_color = b2Color(1, 1, 1)
+		if  hasattr(pilot, "shipColor"):
+			ship_color = colorParse.rgb_to_b2color(colorParse.hex_to_rgb(pilot.shipColor))
+
 		self.contactHandler.add_spaceship(BoxSpaceship(
 			self.world,
 			pilot,

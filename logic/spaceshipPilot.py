@@ -1,4 +1,6 @@
 import math
+from math import cos, sin, pi
+
 from typing import List
 
 import numpy as np
@@ -6,12 +8,15 @@ import numpy as np
 from logic.location import Location
 from logic.pilotAction import PilotAction, ScanAction
 
-PI = math.pi
-
-
 class SpaceshipPilot:
 
 	def __init__(self, game_width, spaceship_size, ship_color: str = "#FFFFFF"):
+		"""
+		Abstract class for piloting a spaceship.
+		:param game_width: width and height of the game field
+		:param spaceship_size: maximum size of the spaceship
+		:param ship_color: hex string for the ship color
+		"""
 		self.gameWidth = game_width
 		self.spaceshipSize = spaceship_size
 		self.shipColor = ship_color
@@ -40,12 +45,17 @@ class SpaceshipPilot:
 			current_energy: float,
 			located_spaceships: List[np.ndarray]) -> PilotAction:
 		"""
-		This function is called after "prepare_scan". Implement your logic here
+		This function is called after "prepare_scan". Implement your logic here.
 		:param located_spaceships: list of 2D vectors as the positions of all spaceships located with a scan
 		:return: a pilot action to move the spaceship or shoot a rocket
 		"""
 		raise NotImplementedError()
 
+def calc_scan_energy_cost(angle: float, distance: float) -> float:
+	"""
+	Calculates the energy cost of a scan
+	"""
+	return distance * distance * angle / 2
 
 def create_vec(x: float, y: float) -> np.ndarray:
 	"""
@@ -66,19 +76,26 @@ def get_norm_vec(vec: np.ndarray) -> np.ndarray:
 	"""
 	return vec / np.linalg.norm(vec)
 
-def create_vec_from_angle(angle: float):
+def create_vec_from_angle(theta: float):
 	"""
 	Returns a normalized vector pointing in the direction of the angle
 	"""
-	return np.array([np.cos[angle], np.sin(angle)])
+	return np.array([np.cos[theta], np.sin(theta)])
 
 def get_angle_of_vec(vec: np.ndarray) -> float:
 	"""
 	Returns the angle of the vector (-pi to +pi)
 	"""
-	return np.arctan2(vec[1], vec[0])
+	return math.atan2(vec[1], vec[0])
 
 def get_angle_between_vecs(vec1: np.ndarray, vec2: np.ndarray) -> float:
 	v1_u = get_norm_vec(vec1)
 	v2_u = get_norm_vec(vec2)
 	return math.acos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+
+def rotate_vec(vec: np.ndarray, theta: float):
+	"""
+	Returns a copy of a 2D-vector rotated by the angle theta (counter clockwise)
+	"""
+	rotation = np.array([[cos(theta), -sin(theta)], [sin(theta), cos(theta)]])
+	return rotation.dot(vec)
