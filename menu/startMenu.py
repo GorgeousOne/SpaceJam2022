@@ -118,8 +118,8 @@ class StartGameMenu(GameMenu):
 		self.pilotClasses.clear()
 		self.availablePilotsBox.clear()
 		self.selectedPilotsBox.clear()
-		self._load_default_pilots()
 		self._load_user_pilots()
+		self._load_default_pilots()
 
 	def _load_default_pilots(self):
 		self._add_available_pilot(testdummy.TestDummy, True)
@@ -146,10 +146,8 @@ class StartGameMenu(GameMenu):
 				continue
 
 			if hasattr(pilot_class, "prepare_scan") and hasattr(pilot_class, "update"):
-				# pass
 				self._add_available_pilot(pilot_class)
-			else:
-				print("Class \"" + pilot_class.__name__ + "\" is missing prepare_scan() function or update() function.")
+				print("Loaded pilot \"" + pilot_class.__name__ + "\".")
 
 	def unhide(self):
 		super().unhide()

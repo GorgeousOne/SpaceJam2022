@@ -1,5 +1,6 @@
 import math
 import random
+import traceback
 
 import numpy as np
 from Box2D import b2Vec2, b2World, b2Color
@@ -9,8 +10,8 @@ from game.boxRocket import BoxRocket
 from game.boxScan import BoxScan
 from game.boxSpaceship import BoxSpaceship
 from logic import scanning
-from logic.pilotAction import PilotAction, ScanAction
-from logic.spaceshipPilot import SpaceshipPilot
+from pilotAction import PilotAction, ScanAction
+from spaceshipPilot import SpaceshipPilot
 from util import colorParse
 
 
@@ -71,13 +72,21 @@ class GameHandler:
 
 		for spaceship in self.contactHandler.spaceships:
 			spaceship.add_energy(self.energyPerTick)
-			scan = spaceship.prepare_scan(self.gameTick, self.ticksPerSecond)
+
+			try:
+				scan = spaceship.prepare_scan(self.gameTick, self.ticksPerSecond)
+			except Exception:
+				trace_exception(spaceship)
+				continue
 			located_spaceships = []
 
 			if scan:
 				located_spaceships = self.handle_pilot_scan(spaceship, scan)
-
-			action = spaceship.update(self.gameTick, self.ticksPerSecond, located_spaceships)
+			try:
+				action = spaceship.update(self.gameTick, self.ticksPerSecond, located_spaceships)
+			except Exception:
+				trace_exception(spaceship)
+				continue
 			self.handle_pilot_action(spaceship, action)
 		self.gameTick += 1
 
@@ -133,6 +142,10 @@ class GameHandler:
 		direction = angle_to_b2vec(shoot_angle) * self.rocketSpeed
 		self.contactHandler.add_rocket(BoxRocket(self.world, spaceship, direction))
 
+def trace_exception(spaceship: BoxSpaceship):
+	spaceship.color = b2Color(1, 0, 0)
+	print("Spaceship \"" + spaceship.name + "\" encountered technical difficulties:")
+	print(traceback.format_exc())
 
 def angle_to_b2vec(angle: float) -> b2Vec2:
 	return b2Vec2(math.cos(angle), math.sin(angle))

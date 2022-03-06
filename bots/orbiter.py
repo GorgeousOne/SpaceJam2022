@@ -1,10 +1,10 @@
 import math
 import numpy as np
 
-from logic import spaceshipPilot as pilot
-from logic.location import Location
-from logic.pilotAction import PilotAction
-from logic.spaceshipPilot import SpaceshipPilot
+import spaceshipPilot as pilot
+from location import Location
+from pilotAction import PilotAction
+from spaceshipPilot import SpaceshipPilot
 
 
 class Orbiter(SpaceshipPilot):

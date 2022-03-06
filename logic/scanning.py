@@ -3,7 +3,7 @@ from typing import List
 
 import numpy as np
 
-from logic.location import Location
+from location import Location
 
 EPSILON = 0.0001
 
