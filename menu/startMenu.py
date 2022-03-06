@@ -6,7 +6,7 @@ import pyglet
 from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
 
-from bots import afkBot, circleBot, batman
+from bots import afk, orbiter, batman, creeper
 from menu.gameMenu import GameMenu
 
 from menu.menuWidget import CustomButton, ScrollList, Title, MenuLabel
@@ -22,7 +22,7 @@ class StartGameMenu(GameMenu):
 		self.max_label_width = 220  # manually evaluated
 		self._setup_watchdog()
 
-		self.doPilotUpdate = False
+		self.doPilotUpdate = True
 		super().__init__(window)
 
 	def _setup_gui(self):
@@ -122,8 +122,9 @@ class StartGameMenu(GameMenu):
 		self._load_user_pilots()
 
 	def _load_default_pilots(self):
-		self._add_available_pilot(afkBot.AfkBot, True)
-		self._add_available_pilot(circleBot.CircleBot, True)
+		self._add_available_pilot(afk.Afk, True)
+		self._add_available_pilot(orbiter.Orbiter, True)
+		self._add_available_pilot(creeper.Creeper, True)
 		self._add_available_pilot(batman.Batman, True)
 
 	# can't get it to work with pyinstaller
@@ -151,7 +152,6 @@ class StartGameMenu(GameMenu):
 
 	def unhide(self):
 		super().unhide()
-		self._reset_pilots()
 
 	def hide(self):
 		super().hide()

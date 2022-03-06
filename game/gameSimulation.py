@@ -62,6 +62,8 @@ class GameSimulation(PygletFramework):
 
 	def start_simulation(self, pilot_classes: List):
 		self._hide_gui()
+		self.gameHandler.reset()
+
 		for pilot in pilot_classes:
 			self.gameHandler.spawn_spaceship(pilot(self.gameSize, self.spaceshipSize))
 

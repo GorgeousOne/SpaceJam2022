@@ -52,7 +52,13 @@ def create_vec(x: float, y: float) -> np.ndarray:
 	Creates a 2D vector with an x- and y-coordinate.
 	The the coordinates can be accessed with the square bracket operator (vec[n]) with 0 for x and 1 for y
 	"""
-	return np.array([x, y])
+	return np.array([x, y], dtype=float)
+
+def get_vec_length(vec: np.ndarray):
+	"""
+	Returns the length of the vector
+	"""
+	return np.linalg.norm(vec)
 
 def get_norm_vec(vec: np.ndarray) -> np.ndarray:
 	"""
