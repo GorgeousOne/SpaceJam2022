@@ -1,3 +1,4 @@
+import traceback
 from typing import List
 
 import pyglet
@@ -65,7 +66,12 @@ class GameSimulation(PygletFramework):
 		self.gameHandler.reset()
 
 		for pilot in pilot_classes:
-			self.gameHandler.spawn_spaceship(pilot(self.gameSize, self.spaceshipSize))
+			try:
+				instance = pilot(self.gameSize, self.spaceshipSize)
+				self.gameHandler.spawn_spaceship(instance)
+			except Exception as e:
+				print("Could not create spaceship \"" + pilot.__name__ + "\":")
+				print(traceback.format_exc())
 
 		self.stepCount = 0
 		self.arePhysicsOn = True

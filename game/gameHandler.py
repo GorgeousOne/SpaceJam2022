@@ -38,9 +38,9 @@ class GameHandler:
 		self.spaceshipSpawnRange = self.gameSize * 0.4
 		self.gameTick = 0
 
-		self.rocketCost = 50
-		self.accCostPerMeterSecondSq = 10
-		self.scanCostPerMeterSq = 1
+		self.shootCost = 50
+		self.moveCostFactor = 5
+		self.scanCostFactor = 1.0 / (10 * math.pi)
 
 	def reset(self):
 		self.gameTick = 0
@@ -99,32 +99,38 @@ class GameHandler:
 			self.handle_pilot_shoot(spaceship, action.shootAngle)
 
 	def handle_pilot_scan(self, spaceship: BoxSpaceship, scan: ScanAction):
-		energy_cost = scanning.calc_scan_energy_cost(scan.angle, scan.distance)
+		try:
+			energy_cost = scanning.calc_scanned_area(scan.distance, scan.angle) * self.scanCostFactor
+		except ValueError as e:
+			print("Could not run scan with distance:", scan.distance, "amd angle", scan.angle)
+			return []
 
 		if energy_cost > spaceship.energy:
+			print("Spaceship \"" + spaceship.name + "\ does not have enough energy for this scan.")
 			return []
-		# raise ValueError("Not enough energy to perform scan.")
-		spaceship.use_energy(energy_cost)
 
 		located_rockets = scanning.calc_located_spaceships(
 			spaceship.get_location(self.ticksPerSecond),
 			scan.direction,
 			scan.distance,
 			scan.angle,
-			[other.get_location().position for other in self.contactHandler.spaceships if other != spaceship])
+			[other.get_location() for other in self.contactHandler.spaceships if other != spaceship])
 
-		if located_rockets:
-			self.contactHandler.add_scan(BoxScan(
-				spaceship.get_location(self.ticksPerSecond).get_position(),
-				scan.direction,
-				scan.distance,
-				scan.angle,
-				self.scanSuccessColor if located_rockets else self.scanFailColor))
+		self.contactHandler.add_scan(BoxScan(
+			spaceship.get_location(self.ticksPerSecond).get_position(),
+			scan.direction,
+			scan.distance,
+			scan.angle,
+			self.scanSuccessColor if located_rockets else self.scanFailColor))
+
+		spaceship.use_energy(energy_cost)
+		located_rockets = [loc.get_position() for loc in located_rockets]
+		random.shuffle(located_rockets)
 		return located_rockets
 
 	def handle_pilot_move(self, spaceship: BoxSpaceship, acceleration: np.ndarray):
 		power = min(self.maxSpaceshipSpeedPerTick, np.linalg.norm(acceleration))
-		energy_cost = power * self.accCostPerMeterSecondSq
+		energy_cost = power * self.moveCostFactor
 
 		if energy_cost > spaceship.energy:
 			return
@@ -136,9 +142,9 @@ class GameHandler:
 			print("Could not move spaceship with: " + str(acceleration) + ". Is this really a float vector?")
 
 	def handle_pilot_shoot(self, spaceship: BoxSpaceship, shoot_angle: float):
-		if self.rocketCost > spaceship.energy:
+		if self.shootCost > spaceship.energy:
 			return
-		spaceship.use_energy(self.rocketCost)
+		spaceship.use_energy(self.shootCost)
 		direction = angle_to_b2vec(shoot_angle) * self.rocketSpeed
 		self.contactHandler.add_rocket(BoxRocket(self.world, spaceship, direction))
 

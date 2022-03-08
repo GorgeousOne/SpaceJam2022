@@ -51,11 +51,12 @@ class SpaceshipPilot:
 		"""
 		raise NotImplementedError()
 
-def calc_scan_energy_cost(angle: float, distance: float) -> float:
+def calc_scan_energy_cost(distance: float, angle: float) -> float:
 	"""
 	Calculates the energy cost of a scan
 	"""
-	return distance * distance * angle / 2
+	cost_factor = 1.0 / (10 * math.pi)
+	return distance * distance * angle / 2 * cost_factor
 
 def create_vec(x: float, y: float) -> np.ndarray:
 	"""
@@ -74,9 +75,18 @@ def get_norm_vec(vec: np.ndarray) -> np.ndarray:
 	"""
 	Returns the normal vector of the vector.
 	"""
-	return vec / np.linalg.norm(vec)
+	return vec / get_vec_length(vec)
 
-def create_vec_from_angle(theta: float):
+def clip_vec(vec: np.ndarray, max_length: float) -> np.ndarray:
+	"""
+	Returns a vector that has a limited length
+	"""
+	if get_vec_length(vec) > max_length:
+		return get_norm_vec(vec) * max_length
+	return np.copy(vec)
+
+
+def create_vec_from_angle(theta: float) -> np.ndarray:
 	"""
 	Returns a normalized vector pointing in the direction of the angle
 	"""
@@ -87,6 +97,9 @@ def get_angle_of_vec(vec: np.ndarray) -> float:
 	Returns the angle of the vector (-pi to +pi)
 	"""
 	return math.atan2(vec[1], vec[0])
+
+def get_point_dist(point1: np.ndarray, point2: np.ndarray):
+	return get_vec_length(point2 - point1)
 
 def get_angle_between_vecs(vec1: np.ndarray, vec2: np.ndarray) -> float:
 	v1_u = get_norm_vec(vec1)

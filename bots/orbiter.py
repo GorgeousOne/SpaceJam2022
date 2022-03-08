@@ -39,15 +39,10 @@ class Orbiter(SpaceshipPilot):
 
 		angle = self.startAngle + game_tick * self.angleStep
 		target = self.center + np.array([np.cos(angle), np.sin(angle)]) * self.radius
-		vel = current_location.get_velocity()
-		acc = target - (pos + vel)
 
-		total = vel + acc
-		power = pilot.get_vec_length(total)
-		if power > self.speed + 1:
-			total = total * self.speed / power
-			acc = total - vel
-		action.move_spaceship_with_vec(acc)
+		vel = current_location.get_velocity()
+		direction = pilot.clip_vec(target - pos, self.speed)
+		action.move_spaceship_with_vec(direction - vel)
 
 		if game_tick % 10 == 0:
 			center_dir = pilot.get_angle_of_vec(self.center - pos)
