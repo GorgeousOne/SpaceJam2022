@@ -2,6 +2,8 @@ import importlib.util
 import os
 import sys
 
+import pyglet
+
 
 def resource_path(relative_path):
 	try:
@@ -9,6 +11,11 @@ def resource_path(relative_path):
 	except Exception:
 		base_path = os.path.abspath(".")
 	return os.path.join(base_path, relative_path)
+
+
+def load_font(file_name: str):
+	font_path = resource_path("res" + os.path.sep + file_name)
+	pyglet.font.add_file(font_path)
 
 
 def load_external_module(rel_path: str):
