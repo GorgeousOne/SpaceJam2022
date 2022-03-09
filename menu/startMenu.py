@@ -6,7 +6,7 @@ import pyglet
 from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
 
-from bots import afkBot, circleBot, batman, testBot
+from bots import testdummy, orbiter, batman, creeper, explorer
 from menu.gameMenu import GameMenu
 
 from menu.menuWidget import CustomButton, ScrollList, Title, MenuLabel
@@ -22,7 +22,7 @@ class StartGameMenu(GameMenu):
 		self.max_label_width = 220  # manually evaluated
 		self._setup_watchdog()
 
-		self.doPilotUpdate = False
+		self.doPilotUpdate = True
 		super().__init__(window)
 
 	def _setup_gui(self):
@@ -78,8 +78,8 @@ class StartGameMenu(GameMenu):
 				selected_pilots.append(self.pilotClasses[elem.get_foreground().get_text()])
 		return selected_pilots
 
-	def _add_available_pilot(self, pilot_class):
-		name = pilot_class.__name__
+	def _add_available_pilot(self, pilot_class, is_bot: bool = False):
+		name = ("#" if is_bot else "") + pilot_class.__name__
 		name = name[0:16] if len(name) > 16 else name
 
 		# name = self.trim_string(pilot_class.__name__, self.max_label_width, MenuLabel.custom_font_name, MenuLabel.custom_font_size)
@@ -118,14 +118,15 @@ class StartGameMenu(GameMenu):
 		self.pilotClasses.clear()
 		self.availablePilotsBox.clear()
 		self.selectedPilotsBox.clear()
-		self._load_default_pilots()
 		self._load_user_pilots()
+		self._load_default_pilots()
 
 	def _load_default_pilots(self):
-		self._add_available_pilot(afkBot.AfkBot)
-		self._add_available_pilot(circleBot.CircleBot)
-		self._add_available_pilot(testBot.TestBot)
-		self._add_available_pilot(batman.Batman)
+		self._add_available_pilot(testdummy.TestDummy, True)
+		self._add_available_pilot(orbiter.Orbiter, True)
+		self._add_available_pilot(creeper.Creeper, True)
+		self._add_available_pilot(explorer.Explorer, True)
+		self._add_available_pilot(batman.Batman, True)
 
 	# can't get it to work with pyinstaller
 	# pkg_path = fileLoad.resource_path(pilots.__name__)
@@ -145,14 +146,11 @@ class StartGameMenu(GameMenu):
 				continue
 
 			if hasattr(pilot_class, "prepare_scan") and hasattr(pilot_class, "update"):
-				# pass
 				self._add_available_pilot(pilot_class)
-			else:
-				print("Class \"" + pilot_class.__name__ + "\" is missing prepare_scan() function or update() function.")
+				print("Loaded pilot \"" + pilot_class.__name__ + "\".")
 
 	def unhide(self):
 		super().unhide()
-		self._reset_pilots()
 
 	def hide(self):
 		super().hide()

@@ -5,9 +5,9 @@ import numpy as np
 from Box2D import (b2World, b2PolygonShape, b2FixtureDef, b2Color, b2Vec2)
 
 from render.pygletDraw import PygletDraw
-from logic.location import Location
-from logic.pilotAction import PilotAction, ScanAction
-from logic.spaceshipPilot import SpaceshipPilot
+from location import Location
+from pilotAction import PilotAction, ScanAction
+from spaceshipPilot import SpaceshipPilot
 
 hitbox = [
 	(-1.37, -0.58),

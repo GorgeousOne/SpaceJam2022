@@ -1,9 +1,9 @@
 import math
 import random
 
-from logic.location import Location
-from logic.pilotAction import PilotAction
-from logic.spaceshipPilot import SpaceshipPilot
+from location import Location
+from pilotAction import PilotAction
+from spaceshipPilot import SpaceshipPilot
 
 
 class Batman(SpaceshipPilot):

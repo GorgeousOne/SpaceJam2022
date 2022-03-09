@@ -1,21 +1,19 @@
 import math
-from typing import List
-
 import numpy as np
 
-from logic import spaceshipPilot as pilot
-from logic.location import Location
-from logic.pilotAction import PilotAction
-from logic.spaceshipPilot import SpaceshipPilot
+import spaceshipPilot as pilot
+from location import Location
+from pilotAction import PilotAction
+from spaceshipPilot import SpaceshipPilot
 
 
-class CircleBot(SpaceshipPilot):
+class Orbiter(SpaceshipPilot):
 
 	def __init__(self, game_width=0, spaceship_size=0):
 		super().__init__(game_width, spaceship_size, "#2D82F0")
 		self.center = np.array([self.gameWidth / 2, self.gameWidth / 2])
 		self.speed = 3
-		self.radius = 30
+		self.radius = 20
 		self.angleStep = self.speed / self.radius
 		self.startAngle = 0
 
@@ -41,16 +39,12 @@ class CircleBot(SpaceshipPilot):
 
 		angle = self.startAngle + game_tick * self.angleStep
 		target = self.center + np.array([np.cos(angle), np.sin(angle)]) * self.radius
+
 		vel = current_location.get_velocity()
-		acc = target - (pos + vel)
-		power = np.linalg.norm(acc)
+		direction = pilot.clip_vec(target - pos, self.speed)
+		action.move_spaceship_with_vec(direction - vel)
 
-		if power > self.speed:
-			acc = acc * self.speed / power
-		action.move_spaceship_with_vec(acc)
-
-		if game_tick % 5 == 0:
+		if game_tick % 10 == 0:
 			center_dir = pilot.get_angle_of_vec(self.center - pos)
 			action.shoot_rocket(center_dir - math.pi / 2)
-
 		return action

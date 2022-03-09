@@ -15,7 +15,7 @@ def load_external_module(rel_path: str):
 	abs_path = os.path.abspath(rel_path)
 
 	if not os.path.isfile(abs_path):
-		raise ValueError("Could not find module " + abs_path)
+		raise ValueError("Could not find module \"" + abs_path + "\".")
 
 	module_name = abs_path.split(os.path.sep)[-1].split(".")[0]
 	spec = importlib.util.spec_from_file_location(module_name, abs_path)

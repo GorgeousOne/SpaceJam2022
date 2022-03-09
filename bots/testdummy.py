@@ -1,18 +1,17 @@
 import math
 import random
-from typing import List
 
 import numpy as np
 
-from logic.location import Location
-from logic.pilotAction import PilotAction
-from logic.spaceshipPilot import SpaceshipPilot
+from location import Location
+from pilotAction import PilotAction
+from spaceshipPilot import SpaceshipPilot
 
 
-class AfkBot(SpaceshipPilot):
+class TestDummy(SpaceshipPilot):
 
 	def __init__(self, game_width = 0, spaceship_size = 0):
-		super().__init__(game_width, spaceship_size, "#FFBB00")
+		super().__init__(game_width, spaceship_size, "#808080")
 		self.angle = random.random() * math.pi * 2
 		self.isStart = True
 
@@ -30,10 +29,7 @@ class AfkBot(SpaceshipPilot):
 			current_health: float,
 			current_energy: float,
 			located_spaceships) -> PilotAction:
-		action = PilotAction()
-		if game_tick % 10 == 0:
-			action.shoot_rocket(self.angle)
-		return action
+		return None
 
 def vec_angle(vec: np.ndarray):
 	return math.atan2(vec[1], vec[0])
