@@ -21,7 +21,6 @@ class GameSimulation(PygletFramework):
 	def __init__(self, window: pyglet.window.Window):
 		super(GameSimulation, self).__init__(window)
 		self.gameSize = 100
-		self.spaceshipSize = 5  # spaceship svg model currently has size 5
 
 		self.background = BoxBackground(self.gameSize, self.settings.hz)
 		self.gui = None
@@ -67,8 +66,7 @@ class GameSimulation(PygletFramework):
 
 		for pilot in pilot_classes:
 			try:
-				instance = pilot(self.gameSize, self.spaceshipSize)
-				self.gameHandler.spawn_spaceship(instance)
+				self.gameHandler.spawn_spaceship(pilot())
 			except Exception as e:
 				print("Could not create spaceship \"" + pilot.__name__ + "\":")
 				print(traceback.format_exc())

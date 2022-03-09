@@ -1,4 +1,6 @@
 import math
+from typing import List
+
 import numpy as np
 
 import spaceshipPilot as pilot
@@ -9,8 +11,9 @@ from spaceshipPilot import SpaceshipPilot
 
 class Orbiter(SpaceshipPilot):
 
-	def __init__(self, game_width=0, spaceship_size=0):
-		super().__init__(game_width, spaceship_size, "#2D82F0")
+	def __init__(self):
+		super().__init__("#2D82F0")
+		self.gameWidth = 100
 		self.center = np.array([self.gameWidth / 2, self.gameWidth / 2])
 		self.speed = 3
 		self.radius = 20
@@ -30,7 +33,7 @@ class Orbiter(SpaceshipPilot):
 			current_location: Location,
 			current_health: float,
 			current_energy: float,
-			located_spaceships) -> PilotAction:
+			located_spaceships: List[Location]) -> PilotAction:
 		action = PilotAction()
 		pos = current_location.get_position()
 

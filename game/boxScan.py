@@ -8,7 +8,13 @@ from render.pygletDraw import PygletDraw
 
 class BoxScan:
 
-	def __init__(self, pos: b2Vec2, direction: float, distance: float, angle: float, color: b2Color = b2Color(0.8, 0.8, 1), duration: float = 0.5):
+	def __init__(self,
+	             pos: b2Vec2,
+	             direction: float,
+	             distance: float,
+	             angle: float,
+	             color: b2Color = b2Color(0.8, 0.8, 1),
+	             duration: float = 0.2):
 		self.pos = b2Vec2(pos)
 		self.distance = distance
 		self.angleStart = direction - angle / 2

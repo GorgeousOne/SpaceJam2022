@@ -1,3 +1,5 @@
+from typing import List
+
 import numpy as np
 
 import spaceshipPilot as pilot
@@ -8,8 +10,10 @@ from spaceshipPilot import SpaceshipPilot
 
 class Creeper(SpaceshipPilot):
 
-	def __init__(self, game_width=0, spaceship_size=0):
-		super().__init__(game_width, spaceship_size, "#1B8F1D")
+	def __init__(self):
+		super().__init__("#1B8F1D")
+		self.gameWidth = 100
+		self.spaceshipSize = 5
 		self.speed = 3
 		self.xCoord = None
 		self.fliesLeft = None
@@ -30,7 +34,7 @@ class Creeper(SpaceshipPilot):
 			current_location: Location,
 			current_health: float,
 			current_energy: float,
-			located_spaceships) -> PilotAction:
+			located_spaceships: List[Location]) -> PilotAction:
 		action = PilotAction()
 		pos = current_location.get_position()
 		vel = current_location.get_velocity()
