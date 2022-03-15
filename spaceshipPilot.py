@@ -53,10 +53,11 @@ class SpaceshipPilot:
 
 def calc_scan_energy_cost(distance: float, angle: float) -> float:
 	"""
-	Calculates the energy cost of a scan
+	Calculates the energy cost of a scan relative to the size of scanned area
 	"""
 	cost_factor = 1.0 / (10 * math.pi)
-	return distance * distance * angle / 2 * cost_factor
+	scanned_area = distance * distance * angle / 2
+	return scanned_area * cost_factor
 
 
 def create_vec(x: float, y: float) -> np.ndarray:
@@ -78,7 +79,10 @@ def get_norm_vec(vec: np.ndarray) -> np.ndarray:
 	"""
 	Returns the normal vector of the vector.
 	"""
-	return vec / get_vec_length(vec)
+	norm = np.linalg.norm(vec)
+	if norm > 0:
+		return vec / norm
+	return vec
 
 
 def clip_vec(vec: np.ndarray, max_length: float) -> np.ndarray:

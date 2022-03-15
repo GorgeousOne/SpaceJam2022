@@ -26,7 +26,7 @@ class GameHandler:
 		self.spaceshipHealth = 100
 		self.spaceshipMaxEnergy = 100
 
-		self.maxSpaceshipSpeedPerTick = 10
+		self.maxSpaceshipSpeedPerTick = 5
 		self.energyPerTick = 10
 
 		self.timePenaltyStart = 15 * self.ticksPerSecond
@@ -81,6 +81,7 @@ class GameHandler:
 				continue
 			located_spaceships = []
 			if scan:
+				scan.distance = min(50, scan.distance)
 				located_spaceships = self.handle_pilot_scan(spaceship, scan)
 			random.shuffle(located_spaceships)
 			scan_results[spaceship] = located_spaceships

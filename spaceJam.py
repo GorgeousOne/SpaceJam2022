@@ -64,7 +64,6 @@ class SpaceJam(PygletFramework):
 	def get_game_projection(self):
 		border_thickness = 1
 		scale = self.windowSize / (self.gameSize + 4 * border_thickness)
-		print(scale)
 
 		gl.glPushMatrix()
 		gl.glLoadIdentity()
