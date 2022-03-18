@@ -8,17 +8,16 @@ import numpy as np
 from location import Location
 from pilotAction import PilotAction, ScanAction
 
+
 class SpaceshipPilot:
 
-	def __init__(self, game_width, spaceship_size, ship_color: str = "#FFFFFF"):
+	def __init__(self, ship_color: str = "#FFFFFF"):
 		"""
 		Abstract class for piloting a spaceship.
 		:param game_width: width and height of the game field
 		:param spaceship_size: maximum size of the spaceship
 		:param ship_color: hex string for the ship color
 		"""
-		self.gameWidth = game_width
-		self.spaceshipSize = spaceship_size
 		self.shipColor = ship_color
 
 	def prepare_scan(
@@ -43,7 +42,7 @@ class SpaceshipPilot:
 			current_location: Location,
 			current_health: float,
 			current_energy: float,
-			located_spaceships: List[np.ndarray]) -> PilotAction:
+			located_spaceships: List[Location]) -> PilotAction:
 		"""
 		This function is called after "prepare_scan". Implement your logic here.
 		:param located_spaceships: list of 2D vectors as the positions of all spaceships located with a scan
@@ -51,12 +50,23 @@ class SpaceshipPilot:
 		"""
 		raise NotImplementedError()
 
+
 def calc_scan_energy_cost(distance: float, angle: float) -> float:
+	"""
+	Calculates the energy cost of a scan relative to the size of scanned area
+	"""
+	cost_factor = 1.0 / (10 * pi)
+	scanned_area = distance * distance * angle / 2
+	return scanned_area * cost_factor
+
+
+def calc_movement_energy_cost(power: float) -> float:
 	"""
 	Calculates the energy cost of a scan
 	"""
-	cost_factor = 1.0 / (10 * math.pi)
-	return distance * distance * angle / 2 * cost_factor
+	cost_factor = 5
+	return power * cost_factor
+
 
 def create_vec(x: float, y: float) -> np.ndarray:
 	"""
@@ -65,17 +75,23 @@ def create_vec(x: float, y: float) -> np.ndarray:
 	"""
 	return np.array([x, y], dtype=float)
 
+
 def get_vec_length(vec: np.ndarray):
 	"""
 	Returns the length of the vector
 	"""
 	return np.linalg.norm(vec)
 
+
 def get_norm_vec(vec: np.ndarray) -> np.ndarray:
 	"""
 	Returns the normal vector of the vector.
 	"""
-	return vec / get_vec_length(vec)
+	norm = np.linalg.norm(vec)
+	if norm > 0:
+		return vec / norm
+	return vec
+
 
 def clip_vec(vec: np.ndarray, max_length: float) -> np.ndarray:
 	"""
@@ -92,19 +108,23 @@ def create_vec_from_angle(theta: float) -> np.ndarray:
 	"""
 	return np.array([np.cos[theta], np.sin(theta)])
 
+
 def get_angle_of_vec(vec: np.ndarray) -> float:
 	"""
 	Returns the angle of the vector (-pi to +pi)
 	"""
 	return math.atan2(vec[1], vec[0])
 
-def get_point_dist(point1: np.ndarray, point2: np.ndarray):
+
+def get_point_distance(point1: np.ndarray, point2: np.ndarray):
 	return get_vec_length(point2 - point1)
+
 
 def get_angle_between_vecs(vec1: np.ndarray, vec2: np.ndarray) -> float:
 	v1_u = get_norm_vec(vec1)
 	v2_u = get_norm_vec(vec2)
 	return math.acos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+
 
 def rotate_vec(vec: np.ndarray, theta: float):
 	"""

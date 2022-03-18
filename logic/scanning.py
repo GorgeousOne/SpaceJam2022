@@ -7,11 +7,14 @@ from location import Location
 
 EPSILON = 0.0001
 
+
 def wrap_to_pi(rad_angle):
 	return (rad_angle + math.pi) % (2 * math.pi) - math.pi
 
+
 def calc_scanned_area(distance: float, angle: float) -> float:
 	return distance * distance * angle / 2
+
 
 def calc_located_spaceships(scan_center: Location, direction: float, distance: float, angle: float, targets: List[Location]) -> List[Location]:
 	return list(filter(lambda loc: is_loc_in_scan(loc, scan_center, direction, distance, angle), targets))

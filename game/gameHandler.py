@@ -26,13 +26,13 @@ class GameHandler:
 		self.spaceshipHealth = 100
 		self.spaceshipMaxEnergy = 100
 
-		self.maxSpaceshipSpeedPerTick = 10
+		self.maxSpaceshipSpeedPerTick = 5
 		self.energyPerTick = 10
 
 		self.timePenaltyStart = 15 * self.ticksPerSecond
 		self.timPenaltyDmg = 1
 
-		self.rocketSpeed = 25
+		self.rocketSpeed = 5 * self.ticksPerSecond
 		self.scanSuccessColor = b2Color(1, .2, .2)
 		self.scanFailColor = b2Color(1, 1, 1)
 		self.spaceshipSpawnRange = self.gameSize * 0.4
@@ -53,7 +53,7 @@ class GameHandler:
 			self.gameSize / 2 + math.sin(angle) * distance)
 
 		ship_color = b2Color(1, 1, 1)
-		if  hasattr(pilot, "shipColor"):
+		if hasattr(pilot, "shipColor"):
 			ship_color = colorParse.rgb_to_b2color(colorParse.hex_to_rgb(pilot.shipColor))
 
 		self.contactHandler.add_spaceship(BoxSpaceship(
@@ -70,6 +70,7 @@ class GameHandler:
 			for spaceship in list(self.contactHandler.spaceships):
 				self.contactHandler.damage_spaceship(spaceship, self.timPenaltyDmg)
 
+		scan_results = {}
 		for spaceship in self.contactHandler.spaceships:
 			spaceship.add_energy(self.energyPerTick)
 
@@ -79,11 +80,15 @@ class GameHandler:
 				trace_exception(spaceship)
 				continue
 			located_spaceships = []
-
 			if scan:
+				scan.distance = min(50, scan.distance)
 				located_spaceships = self.handle_pilot_scan(spaceship, scan)
+			random.shuffle(located_spaceships)
+			scan_results[spaceship] = located_spaceships
+
+		for spaceship in self.contactHandler.spaceships:
 			try:
-				action = spaceship.update(self.gameTick, self.ticksPerSecond, located_spaceships)
+				action = spaceship.update(self.gameTick, self.ticksPerSecond, scan_results[spaceship])
 			except Exception:
 				trace_exception(spaceship)
 				continue
@@ -114,17 +119,17 @@ class GameHandler:
 			scan.direction,
 			scan.distance,
 			scan.angle,
-			[other.get_location() for other in self.contactHandler.spaceships if other != spaceship])
+			[other.get_location(self.ticksPerSecond) for other in self.contactHandler.spaceships if other != spaceship])
 
 		self.contactHandler.add_scan(BoxScan(
 			spaceship.get_location(self.ticksPerSecond).get_position(),
 			scan.direction,
 			scan.distance,
 			scan.angle,
-			self.scanSuccessColor if located_rockets else self.scanFailColor))
+			self.scanSuccessColor if located_rockets else self.scanFailColor,
+			1.0 / self.ticksPerSecond))
 
 		spaceship.use_energy(energy_cost)
-		located_rockets = [loc.get_position() for loc in located_rockets]
 		random.shuffle(located_rockets)
 		return located_rockets
 
@@ -148,10 +153,12 @@ class GameHandler:
 		direction = angle_to_b2vec(shoot_angle) * self.rocketSpeed
 		self.contactHandler.add_rocket(BoxRocket(self.world, spaceship, direction))
 
+
 def trace_exception(spaceship: BoxSpaceship):
 	spaceship.color = b2Color(1, 0, 0)
 	print("Spaceship \"" + spaceship.name + "\" encountered technical difficulties:")
 	print(traceback.format_exc())
+
 
 def angle_to_b2vec(angle: float) -> b2Vec2:
 	return b2Vec2(math.cos(angle), math.sin(angle))

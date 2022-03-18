@@ -1,5 +1,6 @@
 import math
 import random
+from typing import List
 
 import numpy as np
 
@@ -10,8 +11,8 @@ from spaceshipPilot import SpaceshipPilot
 
 class TestDummy(SpaceshipPilot):
 
-	def __init__(self, game_width = 0, spaceship_size = 0):
-		super().__init__(game_width, spaceship_size, "#808080")
+	def __init__(self):
+		super().__init__("#808080")
 		self.angle = random.random() * math.pi * 2
 		self.isStart = True
 
@@ -28,8 +29,9 @@ class TestDummy(SpaceshipPilot):
 			current_location: Location,
 			current_health: float,
 			current_energy: float,
-			located_spaceships) -> PilotAction:
+			located_spaceships: List[Location]) -> PilotAction:
 		return None
+
 
 def vec_angle(vec: np.ndarray):
 	return math.atan2(vec[1], vec[0])
