@@ -121,6 +121,7 @@ class SpaceJam(PygletFramework):
 
 	def _announce_result(self):
 		self.isGameOver = True
+		self.gamOverMenu.set_time(self.gameHandler.gameTick)
 		self._show_gui(self.gamOverMenu)
 
 		if len(self.contactHandler.spaceships) > 0:

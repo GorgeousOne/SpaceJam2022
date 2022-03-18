@@ -106,6 +106,8 @@ class GameHandler:
 	def handle_pilot_scan(self, spaceship: BoxSpaceship, scan: ScanAction):
 		try:
 			energy_cost = scanning.calc_scanned_area(scan.distance, scan.angle) * self.scanCostFactor
+			if energy_cost < 0:
+				return []
 		except ValueError as e:
 			print("Could not run scan with distance:", scan.distance, "amd angle", scan.angle)
 			return []

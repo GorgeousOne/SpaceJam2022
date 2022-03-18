@@ -8,15 +8,18 @@ class MenuLabel(glooey.Label):
 	custom_font_size = 12
 	custom_padding = 10
 
+
 class Title(glooey.Label):
 	custom_font_name = "GravityRobotBold8"
 	custom_font_size = 12
 	custom_color = '#FFFFFF'
 	custom_alignment = 'center'
 
+
 class VScrollBox(glooey.ScrollBox):
 	class VBar(glooey.VScrollBar):
 		pass
+
 
 class ScrollList(glooey.VBox):
 	custom_alignment = 'top'
