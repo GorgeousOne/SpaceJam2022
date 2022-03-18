@@ -143,13 +143,13 @@ class SpaceJam(PygletFramework):
 			scan.display(self.renderer, 1)
 		for rocket in self.contactHandler.rockets:
 			rocket.display(self.renderer, 1)
+		self.border.display(self.renderer, 2)
 
 		text_layer = 4
 		for ship in self.contactHandler.spaceships:
-			ship.display(self.renderer, 2, text_layer if self.doDisplayNames else None)
+			ship.display(self.renderer, 3, text_layer if self.doDisplayNames else None)
 			text_layer += 1
 
-		self.border.display(self.renderer, 3)
 		self.renderer.StartDraw()
 
 		if self.gui:

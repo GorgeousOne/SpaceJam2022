@@ -55,9 +55,17 @@ def calc_scan_energy_cost(distance: float, angle: float) -> float:
 	"""
 	Calculates the energy cost of a scan relative to the size of scanned area
 	"""
-	cost_factor = 1.0 / (10 * math.pi)
+	cost_factor = 1.0 / (10 * pi)
 	scanned_area = distance * distance * angle / 2
 	return scanned_area * cost_factor
+
+
+def calc_movement_energy_cost(power: float) -> float:
+	"""
+	Calculates the energy cost of a scan
+	"""
+	cost_factor = 5
+	return power * cost_factor
 
 
 def create_vec(x: float, y: float) -> np.ndarray:
@@ -108,7 +116,7 @@ def get_angle_of_vec(vec: np.ndarray) -> float:
 	return math.atan2(vec[1], vec[0])
 
 
-def get_point_dist(point1: np.ndarray, point2: np.ndarray):
+def get_point_distance(point1: np.ndarray, point2: np.ndarray):
 	return get_vec_length(point2 - point1)
 
 
